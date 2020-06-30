@@ -53,7 +53,9 @@ ion-header {
     transform: translateY(calc(100vh));
 }
 .open-panel {
-    transform: translateY(0);
+  transform: translateY(0);
+    //map.page currentMargin = -350
+    //transform: translateY(350px);
 }
 @media (min-width: 680px){
   .right-panel {    

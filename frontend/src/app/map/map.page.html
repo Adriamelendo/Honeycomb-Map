@@ -1,4 +1,4 @@
-<ion-header translucent="true">
+<ion-header translucent="true" [ngStyle]="{'transition': 'margin-top 700ms', 'margin-top.px': currentMargin}">
   <ion-toolbar>
     <ion-buttons *ngIf="!showSearchbar" slot="start">
       <ion-menu-button menu=“startmenu”></ion-menu-button>

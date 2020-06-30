@@ -17,6 +17,7 @@ export class MapPage implements OnInit {
   howSearchbar: boolean;
   queryText = '';
   segment = 'all';
+  currentMargin = 0;
   // excludeTracks: any = [];
 
 
@@ -49,10 +50,22 @@ export class MapPage implements OnInit {
   updateFilter() {
     //ADRIA: temporal thing, the following must be executed when click on hexagon
     this.isHexSelected=!this.isHexSelected;
+
+    /*
+    //do it only before @media (min-width: 680px)
+    if(this.isHexSelected) {
+      //350 must be half oh map height
+      //to setView set to the center of the space
+      //if change this we must change .open-panel
+      this.currentMargin = -350;
+    } else {
+      this.currentMargin = 0;
+    }
+    */
   }
 
   ionViewDidEnter() {
-    this.leafletMap();
+    this.leafletMap();    
   }
 
   leafletMap() {
