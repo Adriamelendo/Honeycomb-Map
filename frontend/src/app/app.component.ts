@@ -4,6 +4,7 @@ import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { environment } from '../environments/environment';
+import { AuthService } from './auth/auth.service';
 
 // Use parse with typescript
 import * as Parse from 'parse';
@@ -17,10 +18,13 @@ let parse = require('parse');
   styleUrls: ['app.component.scss']
 })
 export class AppComponent {
+  signedIn = false;
+
   constructor(
     private platform: Platform,
     private splashScreen: SplashScreen,
-    private statusBar: StatusBar
+    private statusBar: StatusBar,
+    private  authService:  AuthService
   ) {
     this.initializeApp();
     //Parse init
@@ -30,14 +34,11 @@ export class AppComponent {
     // Parse.secret = 'my Secrey Key';
 
     //to start always signOut
-    var currentUser = Parse.User.current();
-    if (currentUser) {
-      Parse.User.logOut();
-    }
-    
-
-
-
+    this.signOut();
+    // var currentUser = Parse.User.current();
+    // if (currentUser) {
+    //   Parse.User.logOut();
+    // }
   }
 
   initializeApp() {
@@ -45,9 +46,14 @@ export class AppComponent {
       this.statusBar.styleDefault();
       this.splashScreen.hide();
     });
+    this.authService.isSignedIn().subscribe((resp=>{
+      this.signedIn=resp;
+    }))
   }
 
-
+  signOut() {
+    this.authService.signOut();
+  }
 
   // getClosestUser() {
   //   let geoPoint = new Parse.GeoPoint(this.geoposition.coords.latitude, this.geoposition.coords.longitude);

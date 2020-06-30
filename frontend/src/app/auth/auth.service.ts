@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { User } from './user';
+import { Observable, BehaviorSubject } from 'rxjs';
 
 // Use parse with typescript
 import * as Parse from 'parse';
@@ -9,6 +10,8 @@ import * as Parse from 'parse';
   providedIn: 'root'
 })
 export class AuthService {
+
+  authSubject = new BehaviorSubject(false);
 
   constructor(
     private alertCtrl: AlertController
@@ -20,8 +23,9 @@ export class AuthService {
     // Parse.secret = 'my Secrey Key';
   }
 
-  isSignedIn() {
-    return Parse.User.current().get('emailVerified');
+  isSignedIn():Observable<boolean> {
+    return this.authSubject.asObservable();
+    // return Parse.User.current().get('emailVerified');
     // this.authSubject.next(true);
   }
 
@@ -54,6 +58,7 @@ export class AuthService {
       if (parseUser.get('emailVerified')) {
         // If you app has Tabs, set root to TabsPage
         // this.navCtrl.setRoot('HomePage')
+        this.authSubject.next(true);
         return true;
       } else {
         Parse.User.logOut().then((resp) => {
@@ -80,9 +85,10 @@ export class AuthService {
   }
 
 
-  signout() {
+  signOut() {
     Parse.User.logOut().then((resp) => {
       console.log('Signed out successfully', resp);
+      this.authSubject.next(false);
     }, err => {
       console.log('Error signing out', err);
     })
@@ -92,6 +98,11 @@ export class AuthService {
     Parse.User.requestPasswordReset(email)
       .then(() => {
         // Password reset request was sent successfully
+        this.alertCtrl.create({
+          header: 'Alert',
+          message: 'Check your e-mail for password reset.',
+          buttons: ['Ok']
+        }).then(res => res.present());
       }).catch((err) => {
         // Show the error message somewhere
         console.log('Error ' + err.code + ' reseting password', err);
