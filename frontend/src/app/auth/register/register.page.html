@@ -1,4 +1,11 @@
-<ion-content  color="primary">
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons>
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content color="primary">
   <form  #form="ngForm" (ngSubmit)="register(form)">
     <ion-grid>
       <ion-row color="primary" justify-content-center>

@@ -9,10 +9,26 @@
     </ion-header>
 
     <ion-content>
-      <ion-list>
-        <ion-item *ngFor="let p of [1,1,1,1,1,1]">
-          <ion-label>{{p}}</ion-label>
-        </ion-item>
+      <ion-list lines="none">
+        <ion-list-header>
+          Account
+        </ion-list-header>
+        <ion-menu-toggle autoHide="false">
+          <ion-item routerLink="/login" routerLinkActive="active" routerDirection="root" detail="false">
+            <ion-icon slot="start" name="log-in"></ion-icon>
+            <ion-label>
+              Login
+            </ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle autoHide="false">
+          <ion-item routerLink="/register" routerLinkActive="active" routerDirection="root" detail="false">
+            <ion-icon slot="start" name="person-add-outline"></ion-icon>
+            <ion-label>
+              Register
+            </ion-label>
+          </ion-item>
+        </ion-menu-toggle>
       </ion-list>
     </ion-content>
   </ion-menu>
@@ -21,15 +37,17 @@
   <ion-menu side="end" contentId="main" menuId=“endmenu”>
     <ion-header translucent="true">
       <ion-toolbar>
-        <ion-title>Secondary Menu</ion-title>
+        <ion-title>Filter</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content>
       <ion-list>
-        <ion-item *ngFor="let p of [2,2,2]">
-          <ion-label>{{p}}</ion-label>
-        </ion-item>
+        <ion-menu-toggle autoHide="false">
+          <ion-item *ngFor="let p of ['category1','category2','category3']">
+            <ion-label>{{p}}</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
       </ion-list>
     </ion-content>
   </ion-menu>
