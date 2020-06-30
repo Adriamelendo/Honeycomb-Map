@@ -19,7 +19,7 @@ export class RegisterPage implements OnInit {
 
   register(form) {
     this.authService.register(form.value).then((isOk) => {
-      if(isOk) this.router.navigateByUrl('sign');
+      if(isOk) this.router.navigateByUrl('signin');
     });
   }
 
