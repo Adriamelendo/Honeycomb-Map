@@ -1,11 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs/operators';
-import { Observable, BehaviorSubject } from 'rxjs';
-
-import { Storage } from '@ionic/storage';
+import { AlertController } from '@ionic/angular';
 import { User } from './user';
-import { AuthResponse } from './auth-response';
 
 // Use parse with typescript
 import * as Parse from 'parse';
@@ -15,139 +10,96 @@ import * as Parse from 'parse';
 })
 export class AuthService {
 
-  AUTH_SERVER_ADDRESS: string = 'http://localhost:3000';
-  authSubject = new BehaviorSubject(false);
-
-  constructor(private httpClient: HttpClient, private storage: Storage) { }
-
-  isLoggedIn() {
-    return this.authSubject.asObservable();
+  constructor(
+    private alertCtrl: AlertController
+  ) {
+    // Parse init already done in app.component
+    // Parse.initialize(environment.PARSE_APP_ID, environment.PARSE_JS_KEY);
+    // parse.serverURL = environment.serverURL;
+    // Parse.enableEncryptedUser();
+    // Parse.secret = 'my Secrey Key';
   }
 
-  register(user: User): Observable<AuthResponse> {
-    return this.httpClient.post<AuthResponse>(`${this.AUTH_SERVER_ADDRESS}/register`, user).pipe(
-      tap(async (res: AuthResponse) => {
-
-        if (res.user) {
-          await this.storage.set("ACCESS_TOKEN", res.user.access_token);
-          await this.storage.set("EXPIRES_IN", res.user.expires_in);
-          this.authSubject.next(true);
-        }
-      })
-
-    );
+  isSignedIn() {
+    return Parse.User.current().get('emailVerified');
+    // this.authSubject.next(true);
   }
-  signUp(user: User) {
-    Parse.User.signUp(user.email, user.password, null).then((resp) => {
-      console.log('Logged in successfully', resp);
+
+  register(user: User): Promise<boolean> {
+    const parseUser = new Parse.User();
+    parseUser.set("username", user.name);
+    parseUser.set("email", user.email);
+    parseUser.set("password", user.password);
+    // other fields can be set just like with Parse.Object
+    // parseUser.set("phone", "415-392-0202");
+    return parseUser.signUp(null).then((resp) => {
+      console.log('Register successfully', resp);
+      return true
     }, err => {
-      console.log('Error signing in', err);      
+      console.log('Error ' + err.code + ' registering', err);
+      this.alertCtrl.create({
+        header: 'Error',
+        message: err.message,
+        buttons: ['Ok']
+      }).then(res => res.present());
+      return false
     });
-    // const user = new Parse.User();
-    // user.set("username", 'this.email');
-    // user.set("email", 'this@email.com');
-    // user.set("password", 'this.password');
-    // user.set("rememberMe", true);
-    // user.signUp(null).then(
-    //     function(user) {
-    //         alert('User created successfully with email: ' + user.get("email"));
-    //     },
-    //     function(error) {
-    //         alert("Error " + error.code + ": " + error.message);
-    //     }
-    // );
-      //     var user = new Parse.User();
-      // user.set("username", "my name");
-      // user.set("password", "my pass");
-      // user.set("email", "email@example.com");
-
-      // // other fields can be set just like with Parse.Object
-      // user.set("phone", "415-392-0202");
-      // try {
-      //   await user.signUp();
-      //   // Hooray! Let them use the app now.
-      // } catch (error) {
-      //   // Show the error message somewhere and let the user try again.
-      //   alert("Error: " + error.code + " " + error.message);
-      // }
-
-// is automatically save https://docs.parseplatform.org/js/guide/#current-user
-
-      // emailVerified
+    // is automatically save https://docs.parseplatform.org/js/guide/#current-user
+    // emailVerified
   }
 
-  login(user: User): Observable<AuthResponse> {
-    return this.httpClient.post(`${this.AUTH_SERVER_ADDRESS}/login`, user).pipe(
-      tap(async (res: AuthResponse) => {
-
-        if (res.user) {
-          await this.storage.set("ACCESS_TOKEN", res.user.access_token);
-          await this.storage.set("EXPIRES_IN", res.user.expires_in);
-          this.authSubject.next(true);
-        }
-      })
-    );
-  }  
-  signIn(user: User) {
-//     Parse.enableEncryptedUser();
-// Parse.secret = 'my Secrey Key';
-    Parse.User.logIn(user.email, user.password).then((resp) => {
-      console.log('Logged in successfully', resp);      
+  signIn(user: User): Promise<boolean> {
+    return Parse.User.logIn(user.email, user.password).then((parseUser) => {
+      console.log('Signed in successfully', parseUser);
+      if (parseUser.get('emailVerified')) {
+        // If you app has Tabs, set root to TabsPage
+        // this.navCtrl.setRoot('HomePage')
+        return true;
+      } else {
+        Parse.User.logOut().then((resp) => {
+          console.log('Signed out successfully', resp);
+        }, err => {
+          console.log('Error signing out', err);
+        });
+        this.alertCtrl.create({
+          header: 'Alert',
+          message: 'Your e-mail address must be verified before sign in.',
+          buttons: ['Ok']
+        }).then(res => res.present());
+        return false;
+      }
     }, err => {
-      console.log('Error logging in', err);
+      console.log('Error ' + err.code + ' signing in', err);
+      this.alertCtrl.create({
+        header: 'Error',
+        message: err.message,
+        buttons: ['Ok']
+      }).then(res => res.present());
+      return false;
     });
   }
-//   signIn with email verification() {
-//     Parse.User.logIn(this.username, this.password).then((user) => {
-//         console.log('Logged in successfully', user);
-
-//         if(user.get('emailVerified')) {
-//             // If you app has Tabs, set root to TabsPage
-//             this.navCtrl.setRoot('HomePage')
-//         } else {
-//             Parse.User.logOut().then((resp) => {
-//                 console.log('Logged out successfully', resp);
-//             }, err => {
-//                 console.log('Error logging out', err);
-//             });
-
-//             this.alertCtrl.create({
-//                 title: 'E-mail verification needed',
-//                 message: 'Your e-mail address must be verified before logging in.',
-//                 buttons: ['Ok']
-//             }).present();
-//         }
-//     }, err => {
-//         console.log('Error logging in', err);
-
-//         this.toastCtrl.create({
-//         message: err.message,
-//         duration: 2000
-//         }).present();
-//     });
-// }
 
 
-  async logout() {
-    await this.storage.remove("ACCESS_TOKEN");
-    await this.storage.remove("EXPIRES_IN");
-    this.authSubject.next(false);
-  }
-  ParselogOut() {
+  signout() {
     Parse.User.logOut().then((resp) => {
-      console.log('Logged out successfully', resp);
+      console.log('Signed out successfully', resp);
     }, err => {
-      console.log('Error logging out', err);
+      console.log('Error signing out', err);
     })
   }
 
-//   resetPassword() {
-//     Parse.User.requestPasswordReset("email@example.com")
-// .then(() => {
-//   // Password reset request was sent successfully
-// }).catch((error) => {
-//   // Show the error message somewhere
-//   alert("Error: " + error.code + " " + error.message);
-// });
-//   }
+  resetPassword(email) {
+    Parse.User.requestPasswordReset(email)
+      .then(() => {
+        // Password reset request was sent successfully
+      }).catch((err) => {
+        // Show the error message somewhere
+        console.log('Error ' + err.code + ' reseting password', err);
+        this.alertCtrl.create({
+          header: 'Error',
+          message: err.message,
+          buttons: ['Ok']
+        }).then(res => res.present());
+      });
+  }
 }

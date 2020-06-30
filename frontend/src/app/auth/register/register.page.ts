@@ -11,15 +11,15 @@ export class RegisterPage implements OnInit {
 
   constructor(
     private  authService:  AuthService,
-     private  router:  Router
-     ) { }
+    private  router:  Router
+  ) { }
 
   ngOnInit() {
   }
 
   register(form) {
-    this.authService.register(form.value).subscribe((res) => {
-      this.router.navigateByUrl('map');
+    this.authService.register(form.value).then((isOk) => {
+      if(isOk) this.router.navigateByUrl('sign');
     });
   }
 

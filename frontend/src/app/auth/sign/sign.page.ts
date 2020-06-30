@@ -3,20 +3,20 @@ import { Router } from  "@angular/router";
 import { AuthService } from '../auth.service';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
+  selector: 'app-sign',
+  templateUrl: './sign.page.html',
+  styleUrls: ['./sign.page.scss'],
 })
-export class LoginPage implements OnInit {
+export class SignPage implements OnInit {
 
   constructor(private  authService:  AuthService, private  router:  Router) { }
 
   ngOnInit() {
   }
 
-  login(form){
-    this.authService.login(form.value).subscribe((res)=>{
-      this.router.navigateByUrl('map');
+  sign(form){
+    this.authService.signIn(form.value).then((isOk) => { 
+      if(isOk) this.router.navigateByUrl('map');     
     });
   }
 

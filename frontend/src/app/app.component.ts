@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
-import {environment} from '../environments/environment';
+import { environment } from '../environments/environment';
 
 // Use parse with typescript
 import * as Parse from 'parse';
@@ -26,9 +26,18 @@ export class AppComponent {
     //Parse init
     Parse.initialize(environment.PARSE_APP_ID, environment.PARSE_JS_KEY);
     parse.serverURL = environment.serverURL;
+    // Parse.enableEncryptedUser();
+    // Parse.secret = 'my Secrey Key';
+
+    //to start always signOut
+    var currentUser = Parse.User.current();
+    if (currentUser) {
+      Parse.User.logOut();
+    }
     
-    
-    
+
+
+
   }
 
   initializeApp() {
@@ -38,7 +47,7 @@ export class AppComponent {
     });
   }
 
- 
+
 
   // getClosestUser() {
   //   let geoPoint = new Parse.GeoPoint(this.geoposition.coords.latitude, this.geoposition.coords.longitude);

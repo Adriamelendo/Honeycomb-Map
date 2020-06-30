@@ -15,8 +15,8 @@ const routes: Routes = [
     loadChildren: () => import('./auth/register/register.module').then( m => m.RegisterPageModule)
   },
   {
-    path: 'login',
-    loadChildren: () => import('./auth/login/login.module').then( m => m.LoginPageModule)
+    path: 'sign',
+    loadChildren: () => import('./auth/sign/sign.module').then( m => m.SignPageModule)
   },  
   {
     path: '',
