@@ -1,8 +1,10 @@
 {
   "name": "honeycomb-map",
   "version": "0.0.1",
-  "author": "Ionic Framework",
-  "homepage": "https://ionicframework.com/",
+  "author": "Adria Melendo",
+  "email": "honeycombmaps@gmail.com",
+  "homepage": "http://www.honeycombmap.org/",
+  "license": "MPL-2.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -56,5 +58,5 @@
     "tslint": "~6.1.0",
     "typescript": "~3.8.3"
   },
-  "description": "An Ionic project"
+  "description": "Map system to represent punctual and zone data at same time"
 }
