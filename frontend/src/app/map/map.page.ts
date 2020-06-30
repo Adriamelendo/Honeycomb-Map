@@ -12,14 +12,26 @@ import * as Leaflet from 'leaflet';
 export class MapPage implements OnInit {
 
   map: Leaflet.Map;
-  isHexSelected:boolean=false;
+  isHexSelected: boolean = false;
 
   howSearchbar: boolean;
   queryText = '';
   segment = 'all';
   currentMargin = 0;
-  // excludeTracks: any = [];
+  bigLatLng;
+  bigZoom;
 
+  // excludeTracks: any = [];
+  markerIcon = {
+    icon: Leaflet.icon({
+      iconSize: [25, 41],
+      iconAnchor: [10, 41],
+      popupAnchor: [2, -40],
+      // specify the path here
+      iconUrl: "https://unpkg.com/leaflet@1.5.1/dist/images/marker-icon.png",
+      shadowUrl: "https://unpkg.com/leaflet@1.5.1/dist/images/marker-shadow.png"
+    })
+  };
 
   constructor(
     public modalCtrl: ModalController,
@@ -28,8 +40,8 @@ export class MapPage implements OnInit {
   ) { }
 
   ngOnInit() {
-  } 
-  
+  }
+
   // async createModelWithReturn() {
   //   const modal = await this.modalCtrl.create({
   //     component:  YourComponent ,
@@ -48,24 +60,15 @@ export class MapPage implements OnInit {
   // }
 
   updateFilter() {
-    //ADRIA: temporal thing, the following must be executed when click on hexagon
-    this.isHexSelected=!this.isHexSelected;
 
-    /*
-    //do it only before @media (min-width: 680px)
-    if(this.isHexSelected) {
-      //350 must be half oh map height
-      //to setView set to the center of the space
-      //if change this we must change .open-panel
-      this.currentMargin = -350;
-    } else {
-      this.currentMargin = 0;
-    }
-    */
+  }
+
+  toggleSelectHexagon() {    
+    this.isHexSelected = !this.isHexSelected;    
   }
 
   ionViewDidEnter() {
-    this.leafletMap();    
+    this.leafletMap();
   }
 
   leafletMap() {
@@ -75,9 +78,18 @@ export class MapPage implements OnInit {
       attribution: ''
     }).addTo(this.map);
 
-    // const markPoint = Leaflet.marker([12.972442, 77.594563]);
-    // markPoint.bindPopup('<p>Tashi Delek - Bangalore.</p>');
-    // this.map.addLayer(markPoint);
+    this.map.on("click", e => {
+      console.log(e.latlng); // get the coordinates
+      if (this.isHexSelected) {
+        this.map.flyTo(this.bigLatLng, this.bigZoom, { animate: true, duration: 0.8 });
+      } else {
+        Leaflet.marker(e.latlng, this.markerIcon).addTo(this.map); // add the marker onclick
+        this.bigLatLng = this.map.getCenter()
+        this.bigZoom = this.map.getZoom();
+        this.map.flyTo(e.latlng, 12, { animate: true, duration: 0.8 });
+      }
+      this.toggleSelectHexagon();
+    });
   }
 
   ionViewWillLeave() {

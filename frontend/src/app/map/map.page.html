@@ -1,4 +1,4 @@
-<ion-header translucent="true" [ngStyle]="{'transition': 'margin-top 700ms', 'margin-top.px': currentMargin}">
+<ion-header translucent="true" [ngClass]="{'up-header': true, 'open-up-header': !isHexSelected, 'close-up-header': isHexSelected}">
   <ion-toolbar>
     <ion-buttons *ngIf="!showSearchbar" slot="start">
       <ion-menu-button menu=“startmenu”></ion-menu-button>
@@ -20,10 +20,13 @@
   <ion-toolbar>
     <ion-segment [(ngModel)]="segment" (ionChange)="updateFilter()">
       <ion-segment-button value="all">
-        UnSelect<!-- All -->
+        All
       </ion-segment-button>
       <ion-segment-button value="favorites">
-        Select<!-- Favorites -->
+        Favorites
+      </ion-segment-button>
+      <ion-segment-button value="trending">
+        Trending
       </ion-segment-button>
     </ion-segment>
   </ion-toolbar>

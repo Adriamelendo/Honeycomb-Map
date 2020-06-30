@@ -43,7 +43,7 @@ ion-header {
     overflow-y: scroll; 
     min-height: 240px;
     transform: translateY(calc(100vh));
-    transition: transform 1s;  
+    transition: transform 1.3s;  
     top: 10px;
     bottom: 0px;    
     right: 0px;  
@@ -53,10 +53,22 @@ ion-header {
     transform: translateY(calc(100vh));
 }
 .open-panel {
-  transform: translateY(0);
+  // transform: translateY(0);
     //map.page currentMargin = -350
-    //transform: translateY(350px);
+    transform: translateY(350px);
 }
+
+.up-header {
+  transition: margin-top 0.7s;
+  // FUTURE IMPRIVEMENT: this have some performance issues, better translateY all app
+}
+.open-up-header {
+  margin-top: 0px;
+}
+.close-up-header {
+  margin-top: -300px;
+}
+
 @media (min-width: 680px){
   .right-panel {    
     transform: translateY(0);
@@ -107,5 +119,11 @@ ion-header {
   }
   .open-panel {
       transform: translateY(0);
+  }
+  .open-up-header {
+    margin-top: 0px;
+  }
+  .close-up-header {
+    margin-top: 0px;
   }
 }
