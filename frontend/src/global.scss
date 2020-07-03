@@ -100,7 +100,7 @@ ion-header {
     transform: translateX(0);
   }
   .open-panel {
-      transform: translateX(-2vw); //bring closer to map center    
+      transform: translateX(0); //-10vw to bring closer to map center    
   }
   .show-header {  
     transform: translateY(0);
@@ -110,7 +110,7 @@ ion-header {
     transform: translateY(0);
     height:100vh;
   }
-  
+
   .vertical-scroll{
     overflow-y: scroll;
     height: 100%;
