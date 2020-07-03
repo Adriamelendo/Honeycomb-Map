@@ -5,11 +5,11 @@ import { RouterModule } from '@angular/router';
 
 import { IonicModule } from '@ionic/angular';
 
-import { MessageComponent } from './message.component';
+import { MapHeaderComponent } from './map-header.component';
 
 @NgModule({
   imports: [ CommonModule, FormsModule, IonicModule, RouterModule],
-  declarations: [MessageComponent],
-  exports: [MessageComponent]
+  declarations: [MapHeaderComponent],
+  exports: [MapHeaderComponent]
 })
-export class MessageComponentModule {}
+export class MapHeaderComponentModule {}

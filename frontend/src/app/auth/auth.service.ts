@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { User } from './user';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 // Use parse with typescript
 import * as Parse from 'parse';
+
 
 @Injectable({
   providedIn: 'root'
@@ -83,7 +85,48 @@ export class AuthService {
       return false;
     });
   }
+  async googleSignIn() {
+    // https://docs.parseplatform.org/parse-server/guide/
+    // let id=environment.googleIDdeCliente;
+    // let id_token=environment.googleSecretoDeCliente;
+    // let authData = {
+    //     authData: {
+    //         id: id,
+    //         id_token: id_token
+    //     }
+    // };
+    // var provider = {
+    //     authenticate(options) {
+    //         if (options.success) {
+    //             options.success(this, authData);
+    //         }
+    //     },
+    //     restoreAuthentication(authData) {},
+    //     getAuthType() {
+    //         return 'google';
+    //     },
+    //     deauthenticate() {}
+    // };
+    // let user = new Parse.User();
+    // user.logInWith(provider, authData).done(function (result) {
+    //     console.log(result);
+    // }).fail(function (error) {
+    //     console.log(error);
+    // });
 
+    // const user = await new Parse.User().linkWith('google', {authData: {id, id_token}});
+
+    /*
+    parse config:
+
+    var parseApi = new ParseServer({
+      ...
+      oauth: {
+        google: {}
+      },
+      ...
+    */
+  }
 
   signOut() {
     Parse.User.logOut().then((resp) => {

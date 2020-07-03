@@ -36,53 +36,81 @@ ion-header {
 }
 
 
-.right-panel {
+.items-list {
+  overflow: hidden;
+  min-height:50vh;
+  height:50vh;
+}
+
+.right-panel { 
     position: absolute;
-    z-index:1000;
-    margin: 0px; 
+    z-index:1000;     
     overflow-y: scroll; 
-    min-height: 240px;
-    transform: translateY(calc(100vh));
     transition: transform 1.3s;  
-    top: 10px;
-    bottom: 0px;    
-    right: 0px;  
-    left: 0px;
-}
-.close-panel {
-    transform: translateY(calc(100vh));
-}
-.open-panel {
-  // transform: translateY(0);
-    //map.page currentMargin = -350
-    transform: translateY(350px);
-}
-
-.up-header {
-  transition: margin-top 0.7s;
-  // FUTURE IMPRIVEMENT: this have some performance issues, better translateY all app
-}
-.open-up-header {
-  margin-top: 0px;
-}
-.close-up-header {
-  margin-top: -300px;
-}
-
-@media (min-width: 680px){
-  .right-panel {    
     transform: translateY(0);
-    top: 10px;
-    bottom: 20px;    
-    left: auto;
-    right: 10px;
-    width: 300px;   
+    
+    padding: 10px 10px 0 10px;
+    width: 100vw;
+
     box-sizing: border-box;
     box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 16px;
-    border-radius: 8px;
+    border-radius: 8px 8px 0 0;
     -webkit-box-orient: vertical;
     -webkit-box-direction: normal;
+
+    background-color: white;
+    height: 80vh; //50 of show header + 30 of open panel
+}
+.close-panel {
+    transform: translateY(0);
+}
+.open-panel {
+    transform: translateY(-30vh);    
+}
+
+
+//transition time inside src\app\map\map.page.scss
+.show-header {  
+  transform: translateY(0);
+  height:150vh;
+}
+.hide-header {  
+  transform: translateY(-50vh);  
+  height:150vh;
+}
+
+ @media (min-width: 680px){
+  .items-list {
+    overflow: hidden;
+    min-height:0vh;
+    height:0vh;
   }
+  .right-panel {
+    border-radius: 8px;
+    padding: 10px;
+    transform: translateX(0);
+    width: 300px;
+    height: auto; 
+    top: 132px;
+    bottom: 20px;    
+    left: auto;
+    right: 10px;    
+  }
+  .close-panel {
+    transform: translateX(0);
+  }
+  .open-panel {
+      transform: translateX(-2vw); //bring closer to map center    
+  }
+  .show-header {  
+    transform: translateY(0);
+    height:100vh;
+  }
+  .hide-header {  
+    transform: translateY(0);
+    height:100vh;
+  }
+  
   .vertical-scroll{
     overflow-y: scroll;
     height: 100%;
@@ -90,21 +118,17 @@ ion-header {
   .vertical-scroll::-webkit-scrollbar {
     -webkit-appearance: none;
   }
-
   .vertical-scroll::-webkit-scrollbar:vertical {
     width: 11px;
   }
-
   .vertical-scroll::-webkit-scrollbar:horizontal {
     height: 11px;
   }
-
   .vertical-scroll::-webkit-scrollbar-thumb {
     border-radius: 8px;
     border: 2px solid white; /* should match background, can't be transparent */
     background-color: rgba(0, 0, 0, .5);
   }
-
   .vertical-scroll::-webkit-scrollbar-track { 
     background-color: #fff; 
     border-radius: 8px; 
@@ -112,18 +136,5 @@ ion-header {
   .vertical-scroll::-webkit-scrollbar-corner {
     background-color: #fff;
     border-radius: 8px;
-  }
-
-  .close-panel {
-    transform: translateY(0);
-  }
-  .open-panel {
-      transform: translateY(0);
-  }
-  .open-up-header {
-    margin-top: 0px;
-  }
-  .close-up-header {
-    margin-top: 0px;
   }
 }

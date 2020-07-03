@@ -5,7 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 
 import { MapPageRoutingModule } from './map-routing.module';
-import { MessageComponentModule } from '../message/message.module';
+import { ItemsListComponentModule } from './items-list/items-list.module';
+import { MapHeaderComponentModule } from './map-header/map-header.module';
 
 import { MapPage } from './map.page';
 
@@ -15,7 +16,8 @@ import { MapPage } from './map.page';
     FormsModule,
     IonicModule,
     MapPageRoutingModule,
-    MessageComponentModule,
+    ItemsListComponentModule,
+    MapHeaderComponentModule
   ],
   declarations: [MapPage]
 })

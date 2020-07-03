@@ -19,5 +19,10 @@ export class SignInPage implements OnInit {
       if(isOk) this.router.navigateByUrl('map');     
     });
   }
+  googleSignIn() {
+    this.authService.googleSignIn().then(() => { 
+      this.router.navigateByUrl('map');     
+    });
+  }
 
 }

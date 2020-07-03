@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { ModalController, IonRouterOutlet } from '@ionic/angular';
-import { DataService, Message } from '../services/data.service';
+import { Component, OnInit, HostBinding } from '@angular/core';
+import { DataService, Item } from '../services/data.service';
 
 import * as Leaflet from 'leaflet';
 
@@ -10,16 +9,14 @@ import * as Leaflet from 'leaflet';
   styleUrls: ['./map.page.scss'],
 })
 export class MapPage implements OnInit {
-
   map: Leaflet.Map;
   isHexSelected: boolean = false;
-
-  howSearchbar: boolean;
   queryText = '';
-  segment = 'all';
-  currentMargin = 0;
-  bigLatLng;
-  bigZoom;
+  currentCategory = '';
+  items: Item[] = [];
+  
+  bigLatLng = [];
+  bigZoom = '';
 
   // excludeTracks: any = [];
   markerIcon = {
@@ -33,38 +30,33 @@ export class MapPage implements OnInit {
     })
   };
 
-  constructor(
-    public modalCtrl: ModalController,
-    public routerOutlet: IonRouterOutlet,
-    private data: DataService
-  ) { }
-
-  ngOnInit() {
+  appMapClass: string = 'show-header';
+  @HostBinding('class') get Class() {
+    return this.appMapClass;
   }
 
-  // async createModelWithReturn() {
-  //   const modal = await this.modalCtrl.create({
-  //     component:  YourComponent ,
-  //     swipeToClose: true,
-  //     mode: 'ios', //to show as stack over
-  //     presentingElement: this.routerOutlet.nativeEl,
-  //     componentProps: { excludedTracks: this.excludeTracks }
-  //   });
-  //   await modal.present();
 
-  //   const { data } = await modal.onWillDismiss();
-  //   if (data) {
-  //     this.excludeTracks = data;
-  //     // this.updateWhatever();
-  //   }
-  // }
+  constructor(private data: DataService) { }
 
-  updateFilter() {
+  ngOnInit() {
+    this.getItems();
+  }
 
+  onChangeCategory(c: string) {
+    this.currentCategory=c;
+  }
+
+  onNewSearch(q: string) {
+    this.queryText=q;
   }
 
   toggleSelectHexagon() {    
-    this.isHexSelected = !this.isHexSelected;    
+    this.isHexSelected = !this.isHexSelected;
+    if(this.isHexSelected) {
+      this.appMapClass = 'hide-header';
+    } else {
+      this.appMapClass = 'show-header';
+    }
   }
 
   ionViewDidEnter() {
@@ -96,8 +88,9 @@ export class MapPage implements OnInit {
     this.map.remove();
   }
 
-  getMessages(): Message[] {
-    return this.data.getMessages();
+  getItems() {
+    console.log('asking for items to data service');
+    this.items = this.data.getItems();
   }
 
 }

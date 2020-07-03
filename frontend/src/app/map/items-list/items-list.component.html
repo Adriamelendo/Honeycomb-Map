@@ -1,0 +1,7 @@
+<div [ngClass]="{'right-panel': true, 'open-panel': isHexSelected, 'close-panel': !isHexSelected}">
+  <div class="vertical-scroll">
+    <ion-list>
+      <app-item *ngFor="let item of itemsList" [item]="item"></app-item>
+    </ion-list>
+  </div>
+</div>
