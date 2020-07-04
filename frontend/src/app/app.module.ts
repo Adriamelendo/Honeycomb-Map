@@ -11,6 +11,8 @@ import { AppRoutingModule } from './app-routing.module';
 
 import { AuthModule } from  './auth/auth.module';
 
+import { Geolocation } from '@ionic-native/geolocation/ngx';
+
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
@@ -18,7 +20,8 @@ import { AuthModule } from  './auth/auth.module';
   providers: [
     StatusBar,
     SplashScreen,
-    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
+    { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
+    Geolocation   
   ],
   bootstrap: [AppComponent]
 })
