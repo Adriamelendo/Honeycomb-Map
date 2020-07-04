@@ -60,5 +60,8 @@
     "tslint": "~6.1.0",
     "typescript": "~3.8.3"
   },
+  "browser": {
+    "crypto": false
+  },
   "description": "Map system to represent punctual and zone data at same time"
 }
