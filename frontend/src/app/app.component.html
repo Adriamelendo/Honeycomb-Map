@@ -44,6 +44,19 @@
           </ion-item>
         </ion-menu-toggle>
       </ion-list>
+      <ion-list lines="none">
+        <ion-list-header>
+          Functionalities
+        </ion-list-header>
+        <ion-menu-toggle autoHide="false">
+          <ion-item button (click)="getMyLocation()" detail="false">
+            <ion-icon slot="start" name="locate-outline"></ion-icon>
+            <ion-label>
+              My position
+            </ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
     </ion-content>
   </ion-menu>
 

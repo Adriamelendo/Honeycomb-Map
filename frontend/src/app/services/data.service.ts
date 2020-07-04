@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+// Use parse with typescript
+import * as Parse from 'parse';
 
 export interface Item {
   fromName: string;
@@ -7,6 +9,44 @@ export interface Item {
   id: number;
   read: boolean;
 }
+
+export class LatLngItem extends Parse.Object {
+  title:string;
+  description:string;
+  lat:number;
+  lng:number;
+  position:any;
+  constructor() {
+    // Pass the ClassName to the Parse.Object constructor
+    super('LatLngItem');
+    // All other initialization
+    this.title = 'My item title';
+    this.description = "My item description";
+    this.lat = 0;
+    this.lng = 0;
+    this.position={
+      "__type": "GeoPoint",
+      "latitude": 56,
+      "longitude": 99
+    }
+  }
+
+  getShortTitle():string {
+    const length = 7;
+    return this.title.substring(0, length);
+  }
+
+  static fill(title: string, description: string):LatLngItem {
+    const latLngItem = new LatLngItem();
+    latLngItem.set('title', title);
+    latLngItem.set('description', description);
+    return latLngItem;
+  }
+}
+// After specifying the LatLngItem subclass...
+Parse.Object.registerSubclass('LatLngItem', LatLngItem);
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -76,6 +116,21 @@ export class DataService {
   public getItems(): Item[] {
     return this.items;
   }
+
+  // async getItemsWithinGeoBox(north:number,east:number,south:number,west:number): Item[] {
+  //   //Top Right Bottom Left
+  //   var southwestOfGB = new Parse.GeoPoint(south, west);
+  //   var northeastOfGB = new Parse.GeoPoint(north, east);
+
+  //   var PlaceObject = Parse.Object.extend("PlaceObject");
+
+  //   var query = new Parse.Query(PlaceObject);
+  //   query.withinGeoBox("location", southwestOfGB, northeastOfGB);
+  //   const PlacesInGB = await query.find();
+  //   console.log(PlacesInGB);
+  //   // return PlacesInGB;
+  //   return;
+  // }
 
   public getItemById(id: number): Item {
     return this.items[id];

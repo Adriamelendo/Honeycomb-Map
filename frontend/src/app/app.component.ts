@@ -5,6 +5,7 @@ import { SplashScreen } from '@ionic-native/splash-screen/ngx';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { environment } from '../environments/environment';
 import { AuthService } from './auth/auth.service';
+import { Geolocation, Geoposition } from '@ionic-native/geolocation/ngx';
 
 // Use parse with typescript
 import * as Parse from 'parse';
@@ -18,13 +19,15 @@ let parse = require('parse');
   styleUrls: ['app.component.scss']
 })
 export class AppComponent {
-  signedIn = false;
+  signedIn = false;  
+  geoposition: Geoposition;
 
   constructor(
     private platform: Platform,
     private splashScreen: SplashScreen,
     private statusBar: StatusBar,
-    private  authService:  AuthService
+    private authService:  AuthService,
+    private geolocation: Geolocation
   ) {
     this.initializeApp();
     //Parse init
@@ -53,6 +56,15 @@ export class AppComponent {
 
   signOut() {
     this.authService.signOut();
+  }
+
+  getMyLocation() {
+    this.geolocation.getCurrentPosition().then((resp) => {
+      console.log('Current Position', resp.coords);
+      this.geoposition = resp;
+    }).catch((error) => {
+      console.log('Error getting location', error);
+    });
   }
 
   // getClosestUser() {
