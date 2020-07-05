@@ -15,9 +15,20 @@ export class ViewItemPage implements OnInit {
     private activatedRoute: ActivatedRoute
   ) { }
 
-  ngOnInit() {
+  async ngOnInit() {
     const id = this.activatedRoute.snapshot.paramMap.get('id');
-    this.item = this.data.getItemById(parseInt(id, 10));
+    this.item = this.data.getItemById(id);
+    if(this.item !== undefined) {
+      this.item.read=true;
+    } else { 
+      console.log('Item '+id+' is not inside current data, retriving from backend');
+      this.item = await this.data.getItemByIdFromBackend(id);
+      if(this.item !== undefined) {
+        this.item.read=true;
+      } else { 
+        console.log('Item '+id+' do not exist in backend');
+      }
+    }
   }
 
   getBackButtonText() {

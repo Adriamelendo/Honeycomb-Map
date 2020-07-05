@@ -45,7 +45,7 @@
 .right-panel { 
     position: absolute;
     z-index:1000;     
-    overflow-y: scroll; 
+    overflow-y: auto; 
     transition: transform 1.3s;  
     transform: translateY(0);
     
@@ -112,7 +112,7 @@
   }
 
   .vertical-scroll{
-    overflow-y: scroll;
+    overflow-y: auto;
     height: 100%;
   }
   .vertical-scroll::-webkit-scrollbar {

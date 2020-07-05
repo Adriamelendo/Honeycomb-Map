@@ -56,7 +56,31 @@
             </ion-label>
           </ion-item>
         </ion-menu-toggle>
-      </ion-list>
+        <ion-menu-toggle autoHide="false">
+          <ion-item button (click)="data.queryAllItems()" detail="false"> 
+            <ion-icon slot="start" name="search-circle-outline"></ion-icon>           
+            <ion-label>
+              Find all items
+            </ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle autoHide="false">
+          <ion-item button (click)="data.queryClosestItem()" detail="false"> 
+            <ion-icon slot="start" name="search-circle-outline"></ion-icon>           
+            <ion-label>
+              Add closest item
+            </ion-label>
+          </ion-item>
+        </ion-menu-toggle>        
+        <ion-menu-toggle autoHide="false">
+          <ion-item button (click)="data.queryItemsWithinGeoBox(-3.7,-3.7,50,50)" detail="false"> 
+            <ion-icon slot="start" name="search-circle-outline"></ion-icon>          
+            <ion-label>
+              Add items inside box
+            </ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>      
     </ion-content>
   </ion-menu>
 

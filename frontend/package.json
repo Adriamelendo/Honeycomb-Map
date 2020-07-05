@@ -45,6 +45,7 @@
     "@ionic/angular-toolkit": "^2.1.1",
     "@types/jasmine": "~3.5.0",
     "@types/jasminewd2": "~2.0.3",
+    "@types/leaflet": "^1.5.13",
     "@types/node": "^12.11.1",
     "@types/parse": "^2.12.1",
     "codelyzer": "^5.1.2",

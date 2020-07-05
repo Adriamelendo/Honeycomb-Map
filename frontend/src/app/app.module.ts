@@ -12,6 +12,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AuthModule } from  './auth/auth.module';
 
 import { Geolocation } from '@ionic-native/geolocation/ngx';
+import { DatePipe } from '@angular/common';
 
 @NgModule({
   declarations: [AppComponent],
@@ -21,7 +22,8 @@ import { Geolocation } from '@ionic-native/geolocation/ngx';
     StatusBar,
     SplashScreen,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
-    Geolocation   
+    Geolocation,
+    DatePipe   
   ],
   bootstrap: [AppComponent]
 })

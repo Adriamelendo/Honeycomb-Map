@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { User } from './user';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { environment } from 'src/environments/environment';
 
 // Use parse with typescript
 import * as Parse from 'parse';

@@ -15,8 +15,8 @@ export class MapPage implements OnInit {
   currentCategory = '';
   items: Item[] = [];
   
-  bigLatLng = [];
-  bigZoom = '';
+  bigLatLng: Leaflet.LatLng;
+  bigZoom: number;
 
   // excludeTracks: any = [];
   markerIcon = {
@@ -38,8 +38,11 @@ export class MapPage implements OnInit {
 
   constructor(private data: DataService) { }
 
-  ngOnInit() {
-    this.getItems();
+  async ngOnInit() {
+    this.data.getItems().subscribe((resp=>{
+      this.items=resp;
+    }));
+    this.data.queryAllItems();   
   }
 
   onChangeCategory(c: string) {
@@ -70,7 +73,7 @@ export class MapPage implements OnInit {
       attribution: ''
     }).addTo(this.map);
 
-    this.map.on("click", e => {
+    this.map.on("click", (e:Leaflet.LeafletMouseEvent) => {
       console.log(e.latlng); // get the coordinates
       if (this.isHexSelected) {
         this.map.flyTo(this.bigLatLng, this.bigZoom, { animate: true, duration: 0.8 });
@@ -87,10 +90,4 @@ export class MapPage implements OnInit {
   ionViewWillLeave() {
     this.map.remove();
   }
-
-  getItems() {
-    console.log('asking for items to data service');
-    this.items = this.data.getItems();
-  }
-
 }
