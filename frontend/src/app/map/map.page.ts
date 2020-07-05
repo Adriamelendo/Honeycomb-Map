@@ -1,5 +1,6 @@
 import { Component, OnInit, HostBinding } from '@angular/core';
-import { DataService, Item } from '../services/data.service';
+import { DataService } from '../services/data.service';
+import { Item } from '../interfaces/item';
 
 import * as Leaflet from 'leaflet';
 
@@ -38,7 +39,7 @@ export class MapPage implements OnInit {
 
   constructor(private data: DataService) { }
 
-  async ngOnInit() {
+  ngOnInit() {
     this.data.getItems().subscribe((resp=>{
       this.items=resp;
     }));

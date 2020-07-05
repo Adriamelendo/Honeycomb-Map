@@ -13,6 +13,7 @@ import { AuthModule } from  './auth/auth.module';
 
 import { Geolocation } from '@ionic-native/geolocation/ngx';
 import { DatePipe } from '@angular/common';
+import { UnicodePipe } from './pipes/unicode.pipe';
 
 @NgModule({
   declarations: [AppComponent],
@@ -23,7 +24,8 @@ import { DatePipe } from '@angular/common';
     SplashScreen,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     Geolocation,
-    DatePipe   
+    DatePipe, 
+    UnicodePipe   
   ],
   bootstrap: [AppComponent]
 })

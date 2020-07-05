@@ -1,58 +1,11 @@
 import { Injectable } from '@angular/core';
-// Use parse with typescript
-import * as Parse from 'parse';
 import { DatePipe } from '@angular/common';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { Item } from '../interfaces/item';
+import { UnicodePipe } from '../pipes/unicode.pipe';
 
-export interface Item {
-  owner: string;
-  title: string;
-  description: string;
-  lat: number;
-  lng: number;
-  date: string;
-  id: string;
-  read: boolean;
-}
-
-export class LatLngItem extends Parse.Object {
-  title: string;
-  description: string;
-  lat: number;
-  lng: number;
-  position: any;
-
-  constructor() {
-    // Pass the ClassName to the Parse.Object constructor
-    super('LatLngItem');
-    // All other initialization
-    this.title = 'My item title';
-    this.description = "My item description";
-    this.lat = 0;
-    this.lng = 0;
-    this.position = {
-      "__type": "GeoPoint",
-      "latitude": 56,
-      "longitude": 99
-    }
-  }
-
-  getShortTitle(): string {
-    const length = 7;
-    return this.title.substring(0, length);
-  }
-
-  static fill(title: string, description: string): LatLngItem {
-    const latLngItem = new LatLngItem();
-    latLngItem.set('title', title);
-    latLngItem.set('description', description);
-    return latLngItem;
-  }
-}
-// After specifying the LatLngItem subclass...
-Parse.Object.registerSubclass('LatLngItem', LatLngItem);
-
-
+// Use parse with typescript
+import * as Parse from 'parse';
 
 @Injectable({
   providedIn: 'root'
@@ -62,8 +15,10 @@ export class DataService {
   public items: Item[] = [];
   itemsSubject = new BehaviorSubject(this.items);
 
-
-  constructor(private datePipe: DatePipe) { }
+  constructor(
+    private datePipe: DatePipe,
+    private unicodePipe: UnicodePipe
+    ) { }
 
   public setUserPosition(lat: number, lng: number) {
     this.userPosition.latitude = lat;
@@ -73,7 +28,10 @@ export class DataService {
   public getItemById(id: string): Item {
     return this.items.find(x => x.id === id);
   }
-  
+  public getIndexById(id: string): number {
+    return this.items.findIndex(x => x.id === id);
+  }
+
   private async getItemParseByIdFromBackend(id: string): Promise<Parse.Object<Parse.Attributes>> {
     let query = new Parse.Query('LatLngItem');
     const itemToReturn = await query.get(id);
@@ -93,8 +51,8 @@ export class DataService {
   private fromParseToItem(itemParse: Parse.Object<Parse.Attributes>): Item {
     return {
       owner: 'owner',
-      title: itemParse.get('Title').replace('\\/', '/'),
-      description: itemParse.get('Description').replace('\\/', '/'),
+      title: this.unicodePipe.transform(itemParse.get('Title')),
+      description: this.unicodePipe.transform(itemParse.get('Description')),
       lat: itemParse.get('Location').latitude,
       lng: itemParse.get('Location').longitude,
       date: this.datePipe.transform(itemParse.get('createdAt'), 'dd-MM-yyyy'),
@@ -102,17 +60,30 @@ export class DataService {
       read: false
     }
   }
+  private replaceAllItems(listItemsParse: Parse.Object<Parse.Attributes>[]) {
+    console.log('Items', listItemsParse);
+    //replace all list
+    this.items = listItemsParse.map(itemParse => this.fromParseToItem(itemParse));
+    this.itemsSubject.next(this.items);
+  }
+  private addItemsToEnd(listItemsParse: Parse.Object<Parse.Attributes>[]) {
+    listItemsParse.forEach(itemParse => {
+      let current: Item = this.fromParseToItem(itemParse);
+      while(this.getItemById(current.id)!==undefined){
+        current.id=current.id+'bis';
+        current.title = 'I '+current.title;
+      }
+      this.items.push(current);
+      console.log(this.items);
+    });
+    this.itemsSubject.next(this.items);
+  }
 
   queryAllItems() {
     let query = new Parse.Query('LatLngItem');
 
     query.find().then(listItemsParse => {
-      console.log('Items', listItemsParse);
-
-      //replace all list
-      this.items = listItemsParse.map(itemParse => this.fromParseToItem(itemParse));
-      this.itemsSubject.next(this.items);
-
+      this.replaceAllItems(listItemsParse);
     }, err => {
       console.log('Error getting all items', err)
     })
@@ -123,17 +94,10 @@ export class DataService {
     var southwestOfGB = new Parse.GeoPoint(south, west);
     var northeastOfGB = new Parse.GeoPoint(north, east);
 
-    var LatLngObject = Parse.Object.extend('LatLngItem');
-
-    var query = new Parse.Query(LatLngObject);
+    var query = new Parse.Query('LatLngItem');
     query.withinGeoBox("Location", southwestOfGB, northeastOfGB);
     query.find().then(listItemsParse => {
-      listItemsParse.forEach(itemParse => {
-        let current: Item = this.fromParseToItem(itemParse);
-        this.items.push(current);
-        console.log(this.items);
-      });
-      this.itemsSubject.next(this.items);
+      this.addItemsToEnd(listItemsParse);
     }, err => {
       console.log('Error getting withinGeoBox', err);
     });
@@ -146,13 +110,7 @@ export class DataService {
     query.limit(1);
 
     query.find().then(listItemsParse => {
-      let itemParse = listItemsParse[0];
-      console.log('Closest item', itemParse);
-
-      let current: Item = this.fromParseToItem(itemParse);
-      this.items.push(current);
-      console.log(this.items);
-      this.itemsSubject.next(this.items);
+      this.addItemsToEnd(listItemsParse);
     }, err => {
       console.log('Error getting closest user', err);
     });
@@ -181,7 +139,8 @@ export class DataService {
     const myObject = await this.getItemParseByIdFromBackend(id);
     if (!myObject.isDataAvailable()) {
       await myObject.fetch();
-      this.items.push(this.fromParseToItem(myObject));
+      const idx=this.getIndexById(id);
+      this.items[idx]=this.fromParseToItem(myObject);
     }
   }
 
