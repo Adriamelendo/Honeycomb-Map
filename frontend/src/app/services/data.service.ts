@@ -11,14 +11,15 @@ import * as Parse from 'parse';
   providedIn: 'root'
 })
 export class DataService {
-  userPosition: Parse.GeoPoint = new Parse.GeoPoint(40.428122, -3.696058);
-  public items: Item[] = [];
-  itemsSubject = new BehaviorSubject(this.items);
+  private userPosition: Parse.GeoPoint = new Parse.GeoPoint(40.428122, -3.696058);
+  private items: Item[] = [];
+  private itemsParse: Parse.Object<Parse.Attributes>[] = [];
+  public itemsSubject = new BehaviorSubject(this.items);
 
   constructor(
     private datePipe: DatePipe,
     private unicodePipe: UnicodePipe
-    ) { }
+  ) { }
 
   public setUserPosition(lat: number, lng: number) {
     this.userPosition.latitude = lat;
@@ -51,8 +52,10 @@ export class DataService {
   private fromParseToItem(itemParse: Parse.Object<Parse.Attributes>): Item {
     return {
       owner: 'owner',
-      title: this.unicodePipe.transform(itemParse.get('Title')),
-      description: this.unicodePipe.transform(itemParse.get('Description')),
+      // title: this.unicodePipe.transform(itemParse.get('Title')),
+      // description: this.unicodePipe.transform(itemParse.get('Description')),
+      title: itemParse.get('Title'),
+      description: itemParse.get('Description'),
       lat: itemParse.get('Location').latitude,
       lng: itemParse.get('Location').longitude,
       date: this.datePipe.transform(itemParse.get('createdAt'), 'dd-MM-yyyy'),
@@ -60,18 +63,25 @@ export class DataService {
       read: false
     }
   }
+  private fillParseWithItem(itemParse: Parse.Object<Parse.Attributes>,item:Item) {
+    itemParse.set('Title', item.title);
+    itemParse.set('Description', item.title);
+    itemParse.set('Location', new Parse.GeoPoint(item.lat, item.lng));
+  }
   private replaceAllItems(listItemsParse: Parse.Object<Parse.Attributes>[]) {
     console.log('Items', listItemsParse);
+    this.itemsParse = listItemsParse;
     //replace all list
-    this.items = listItemsParse.map(itemParse => this.fromParseToItem(itemParse));
+    this.items = this.itemsParse.map(itemParse => this.fromParseToItem(itemParse));
     this.itemsSubject.next(this.items);
   }
   private addItemsToEnd(listItemsParse: Parse.Object<Parse.Attributes>[]) {
     listItemsParse.forEach(itemParse => {
+      this.itemsParse.push(itemParse);
       let current: Item = this.fromParseToItem(itemParse);
-      while(this.getItemById(current.id)!==undefined){
-        current.id=current.id+'bis';
-        current.title = 'I '+current.title;
+      while (this.getItemById(current.id) !== undefined) {
+        current.id = current.id + 'bis';
+        current.title = 'I ' + current.title;
       }
       this.items.push(current);
       console.log(this.items);
@@ -120,10 +130,8 @@ export class DataService {
     const LatLngObject = Parse.Object.extend('LatLngItem');
     const itemToSave = new LatLngObject();
 
-    itemToSave.set('Title', item.title);
-    itemToSave.set('Description', item.title);
-    itemToSave.set('Location', new Parse.GeoPoint(item.lat, item.lng));
-
+    this.fillParseWithItem(itemToSave,item);
+    
     itemToSave.save()
       .then((itemParse) => {
         // Execute any logic that should take place after the object is saved.
@@ -136,12 +144,31 @@ export class DataService {
   }
 
   async refreshData(id: string) {
-    const myObject = await this.getItemParseByIdFromBackend(id);
+    const idx = this.getIndexById(id);
+    const myObject = this.itemsParse[idx];
     if (!myObject.isDataAvailable()) {
       await myObject.fetch();
-      const idx=this.getIndexById(id);
-      this.items[idx]=this.fromParseToItem(myObject);
+      this.items[idx] = this.fromParseToItem(myObject);
     }
+  }
+  updateData(item: Item) {
+    const idx = this.getIndexById(item.id);
+    this.items[idx]=item;
+    const myObject = this.itemsParse[idx];
+    this.fillParseWithItem(myObject,item);
+    myObject.save();
+  }
+  destroyData(id: string) {
+    const idx = this.getIndexById(id);
+    const myObject = this.itemsParse[idx];
+    myObject.destroy().then((myObject) => {
+      // The object was deleted from the Parse Cloud.
+      this.items.splice(idx, 1);
+      this.itemsParse.splice(idx, 1);
+    }, (error) => {
+      // The delete failed.
+      // error is a Parse.Error with an error code and message.
+    });
   }
 
 
