@@ -95,8 +95,7 @@ export class MapPage implements OnInit {
   updateMarkers() {
     this.markersLayer.clearLayers();
     this.items.forEach(item=>{      
-      let marker = Leaflet.marker({lat:item.lat, lng: item.lng}, this.markerIcon).addTo(this.markersLayer);
-      console.log('add marker: ',marker);      
+      let marker = Leaflet.marker({lat:item.lat, lng: item.lng}, this.markerIcon).addTo(this.markersLayer);           
     })
   }
 
