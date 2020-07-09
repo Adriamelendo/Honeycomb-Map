@@ -11,7 +11,6 @@ import * as Parse from 'parse';
   providedIn: 'root'
 })
 export class DataService {
-  private ls = true; //localstorage
   private userPosition: Parse.GeoPoint = new Parse.GeoPoint(40.428122, -3.696058);
   private items: Item[] = [];
   private itemsParse: Parse.Object<Parse.Attributes>[] = [];
@@ -21,7 +20,7 @@ export class DataService {
     private datePipe: DatePipe,
     private unicodePipe: UnicodePipe
   ) {
-    if (this.ls) Parse.enableLocalDatastore();
+    Parse.enableLocalDatastore();
   }
 
   public setUserPosition(lat: number, lng: number) {
@@ -38,15 +37,14 @@ export class DataService {
 
   private async getItemParseByIdFromBackend(id: string): Promise<Parse.Object<Parse.Attributes>> {
     let query = new Parse.Query('LatLngItem');
-    if (this.ls) { query.fromLocalDatastore(); }
+    query.fromLocalDatastore();
     let itemToReturn = await query.get(id);
     if (itemToReturn !== undefined) {
       console.log('item undefined in local storage');
-      if (this.ls) {
-        query.fromNetwork();
-        itemToReturn = await query.get(id);
-        itemToReturn.pin();
-      }
+      // search in network
+      query.fromNetwork();
+      itemToReturn = await query.get(id);
+      itemToReturn.pin();      
     }
     return itemToReturn;
   }
@@ -124,8 +122,13 @@ export class DataService {
 
   queryAllItems() {
     let query = new Parse.Query('LatLngItem');
-    if (this.ls) { query.fromLocalDatastore(); }
-    this.queryMoreThan100(query);
+    query.fromLocalDatastore();
+    this.queryMoreThan100(query).then(()=>{
+      if(this.items.length==0){
+        this.forceQueryFromRemoteAllItems();
+      }
+    });
+    
     // query.find().then(listItemsParse => {
     //   this.replaceAllItems(listItemsParse);
     // }, err => {
@@ -157,8 +160,7 @@ export class DataService {
     var northeastOfGB = new Parse.GeoPoint(north, east);
 
     var query = new Parse.Query('LatLngItem');
-    if (this.ls) { query.fromLocalDatastore(); }
-    //if(this.ls) { query.fromPin(); }
+    query.fromLocalDatastore();
     query.withinGeoBox("Location", southwestOfGB, northeastOfGB);
     query.find().then(listItemsParse => {
       //this.addItemsToEnd(listItemsParse);
@@ -189,7 +191,8 @@ export class DataService {
   queryClosestItem() {
     let geoPoint = new Parse.GeoPoint(this.userPosition.latitude, this.userPosition.longitude);
     console.log('geoPoint: ', geoPoint);
-    if (this.ls) {
+    const whereToFind='LOCAL';
+    if (whereToFind=='LOCAL') {
       this.seedyFixToFindTheClosestInLocal(geoPoint);
     } else {
       let query = new Parse.Query('LatLngItem');
