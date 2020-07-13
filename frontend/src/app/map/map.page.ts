@@ -92,29 +92,40 @@ export class MapPage implements OnInit {
       // this.centerClickPoint(e.latlng);
       this.toggleSelectHexagon();
     });
+
     // this.drawAllRegionsOfLevel(8);
-    this.fromBoundsToListHexagonsOfLevel(6);
+
+    // const lev = 6;
+    // const currentHexList = this.fromBoundsToListHexagonsOfLevel(lev);
+    // this.drawInsideRegionsOfLevel(lev,currentHexList);
+
   }
 
-  addMargin(lat:number,lng:number,coef:number): number[]{
+  private findCommonElements(arr1, arr2) {
+    return arr1.some(item => arr2.includes(item))
+  }
+
+
+
+  private addMargin(lat: number, lng: number, coef: number): number[] {
     const new_lat = lat + coef;
     const new_lng = lng + coef / Math.cos(lat * 0.018);
-    return [new_lat,new_lng]
+    return [new_lat, new_lng]
   }
-  
-  fromBoundsToListHexagonsOfLevel(lev:number) {    
+
+  fromBoundsToListHexagonsOfLevel(lev: number) {
     const bounds = this.map.getBounds();
-    
-    const meters=h3.edgeLength(lev, 'm');    
+
+    const meters = h3.edgeLength(lev, 'm');
     // aprox 1km in degree = 1 / 111.32km = 0.0089
     // 1m in degree = 0.0089 / 1000 = 0.0000089
     // pi / 180 = 0.018
     const coef = meters * 1.5 * 0.0000089;
-    
-    const northEast = this.addMargin(bounds.getNorth(),bounds.getEast(),coef);
-    const southWest = this.addMargin(bounds.getSouth(),bounds.getWest(),-coef);
-    
-    const listHex=h3.polyfill([northEast,[northEast[0],southWest[1]],southWest,[southWest[0],northEast[1]]], lev);
+
+    const northEast = this.addMargin(bounds.getNorth(), bounds.getEast(), coef);
+    const southWest = this.addMargin(bounds.getSouth(), bounds.getWest(), -coef);
+
+    const listHex = h3.polyfill([northEast, [northEast[0], southWest[1]], southWest, [southWest[0], northEast[1]]], lev);
     // Leaflet.geoJSON(geojson2h3.h3SetToFeature(listHex), {
     //   style: {
     //     stroke: true,
@@ -124,11 +135,30 @@ export class MapPage implements OnInit {
     //     color: '#0000ff'
     //   }
     // }).addTo(this.map);
-    console.log('current bounds contain '+listHex.length+' hexagons of level '+lev);
+    console.log('current bounds contain ' + listHex.length + ' hexagons of level ' + lev);
     return listHex;
   }
-
-  drawAllRegionsOfLevel(lev:number){
+  drawInsideRegionsOfLevel(lev: number, listHex: string[]) {
+    regions.forEach(region => {
+      if (region.level == lev) {
+        if (region.perimeter.length != 0) {
+          if (this.findCommonElements(listHex, region.perimeter)) {
+            console.log('painting region ' + region.name);
+            Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
+              style: {
+                stroke: true,
+                fill: false,
+                weight: 5,
+                opacity: 1,
+                color: '#0000ff'
+              }
+            }).addTo(this.map);
+          }
+        }
+      }
+    });
+  }
+  drawAllRegionsOfLevel(lev: number) {
     regions.forEach(region => {
       if (region.level == lev) {
         if (region.perimeter.length != 0) {
@@ -145,16 +175,16 @@ export class MapPage implements OnInit {
       }
     });
   }
-  centerClickPoint(latlng: Leaflet.LatLng ){
-      if (this.isHexSelected) {
-        this.map.flyTo(this.bigLatLng, this.bigZoom, { animate: true, duration: 0.8 });
-      } else {
-        // Leaflet.marker(latlng, this.markerIcon).addTo(this.map); // add the marker onclick
-        this.bigLatLng = this.map.getCenter()
-        this.bigZoom = this.map.getZoom();
-        this.map.flyTo(latlng, 12, { animate: true, duration: 0.8 });
-      }
+  centerClickPoint(latlng: Leaflet.LatLng) {
+    if (this.isHexSelected) {
+      this.map.flyTo(this.bigLatLng, this.bigZoom, { animate: true, duration: 0.8 });
+    } else {
+      // Leaflet.marker(latlng, this.markerIcon).addTo(this.map); // add the marker onclick
+      this.bigLatLng = this.map.getCenter()
+      this.bigZoom = this.map.getZoom();
+      this.map.flyTo(latlng, 12, { animate: true, duration: 0.8 });
     }
+  }
 
   updateMarkers() {
     // this.markersLayer.clearLayers();
