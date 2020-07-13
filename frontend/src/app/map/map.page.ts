@@ -7,8 +7,6 @@ import * as Leaflet from 'leaflet';
 
 import resources from '../../assets/data/resources.json';
 import regions from '../../assets/data/regions.json';
-console.log('resources' , resources);
-console.log('regions' , regions);
 
 @Component({
   selector: 'app-map',
@@ -22,7 +20,7 @@ export class MapPage implements OnInit {
   queryText = '';
   currentCategory = '';
   items: Item[] = [];
-  
+
 
 
   bigLatLng: Leaflet.LatLng;
@@ -49,11 +47,11 @@ export class MapPage implements OnInit {
   constructor(private data: DataService) { }
 
   ngOnInit() {
-    // this.data.getItems().subscribe((resp=>{
-    //   this.items=resp;
-    //   this.updateMarkers();
-    // }));
-    // this.data.queryAllItems();   
+    this.data.getItems().subscribe((resp=>{
+      this.items=resp;
+      this.updateMarkers();
+    }));
+    this.data.queryAllItems();
   }
 
   onChangeCategory(c: string) {
@@ -64,7 +62,7 @@ export class MapPage implements OnInit {
     this.queryText=q;
   }
 
-  toggleSelectHexagon() {    
+  toggleSelectHexagon() {
     this.isHexSelected = !this.isHexSelected;
     if(this.isHexSelected) {
       this.appMapClass = 'hide-header';
@@ -99,8 +97,8 @@ export class MapPage implements OnInit {
       this.toggleSelectHexagon();
     });
 
-    regions.forEach(element => {  
-      if(element.perimeter.lenght!=0){    
+    regions.forEach(element => {
+      if(element.perimeter.lenght!=0){
           Leaflet.geoJSON(geojson2h3.h3SetToFeature(element.perimeter), { style: {
             stroke: true,
             fill: false,
@@ -111,14 +109,14 @@ export class MapPage implements OnInit {
         }).addTo(this.map);
      }
     });
-    
+
   }
 
   updateMarkers() {
-    // this.markersLayer.clearLayers();
-    // this.items.forEach(item=>{      
-    //   let marker = Leaflet.marker({lat:item.lat, lng: item.lng}, this.markerIcon).addTo(this.markersLayer);           
-    // })
+    this.markersLayer.clearLayers();
+    this.items.forEach(item=>{
+      let marker = Leaflet.marker({lat:item.lat, lng: item.lng}, this.markerIcon).addTo(this.markersLayer);
+    })
   }
 
   ionViewWillLeave() {
