@@ -49,11 +49,11 @@ export class MapPage implements OnInit {
   constructor(private data: DataService) { }
 
   ngOnInit() {
-    this.data.getItems().subscribe((resp=>{
-      this.items=resp;
-      this.updateMarkers();
-    }));
-    this.data.queryAllItems();
+    // this.data.getItems().subscribe((resp=>{
+    //   this.items=resp;
+    //   this.updateMarkers();
+    // }));
+    // this.data.queryAllItems();
   }
 
   onChangeCategory(c: string) {
@@ -104,12 +104,18 @@ export class MapPage implements OnInit {
     this.drawAllRegionsOfLevel();
     this.drawHexbins();
     // this.fromBoundsToListHexagonsOfLevel();
+    const currentHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom());
+    this.drawInsideRegionsOfLevel(currentHexList);
   }
 
-  addMargin(lat:number,lng:number,coef:number): number[]{
+  private findCommonElements(arr1, arr2) {
+    return arr1.some(item => arr2.includes(item))
+  }
+
+  private addMargin(lat: number, lng: number, coef: number): number[] {
     const new_lat = lat + coef;
     const new_lng = lng + coef / Math.cos(lat * 0.018);
-    return [new_lat,new_lng]
+    return [new_lat, new_lng]
   }
 
   fromBoundsToListHexagonsOfLevel() {
@@ -121,40 +127,53 @@ export class MapPage implements OnInit {
     // pi / 180 = 0.018
     const coef = meters * 1.5 * 0.0000089;
 
-    const northEast = this.addMargin(bounds.getNorth(),bounds.getEast(),coef);
-    const southWest = this.addMargin(bounds.getSouth(),bounds.getWest(),-coef);
+    const northEast = this.addMargin(bounds.getNorth(), bounds.getEast(), coef);
+    const southWest = this.addMargin(bounds.getSouth(), bounds.getWest(), -coef);
 
-    const listHex=h3.polyfill([northEast,[northEast[0],southWest[1]],southWest,[southWest[0],northEast[1]]], this.hexbinZoom());
-    // Leaflet.geoJSON(geojson2h3.h3SetToFeature(listHex), {
-    //   style: {
-    //     stroke: true,
-    //     fill: false,
-    //     weight: 5,
-    //     opacity: 1,
-    //     color: '#0000ff'
-    //   }
-    // }).addTo(this.map);
-    // console.log('current bounds contain '+listHex.length+' hexagons of level '+this.hexbinZoom());
+    const listHex = h3.polyfill([northEast, [northEast[0], southWest[1]], southWest, [southWest[0], northEast[1]]], this.hexbinZoom());
+
+    console.log('current bounds contain ' + listHex.length + ' hexagons of level ' + lev);
     return listHex;
   }
 
-  drawHexbins(){
-    const hexbinsFiltred = this.zoomFilter(resources);
-    hexbinsFiltred.forEach(hexbin => {
-      if (hexbin.hex) {
-        // Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.hex), {
-        //   style: {
-        //     stroke: false,
-        //     fill: true,
-        //     fillOpacity: 0.6,
-        //     opacity: 1,
-        //   }
-        // }).addTo(this.map);
-      }
-    });
-  }
+    drawHexbins(){
+        const hexbinsFiltred = this.zoomFilter(resources);
+        hexbinsFiltred.forEach(hexbin => {
+            if (hexbin.hex) {
+                // Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.hex), {
+                //   style: {
+                //     stroke: false,
+                //     fill: true,
+                //     fillOpacity: 0.6,
+                //     opacity: 1,
+                //   }
+                // }).addTo(this.map);
+            }
+        });
+    }
 
-  drawAllRegionsOfLevel(){
+    drawInsideRegionsOfLevel( listHex: string[]) {
+        const regionsFiltred = this.zoomFilter(regions);
+        regionsFiltred.forEach(region => {
+            if (region.perimeter.length != 0) {
+                if (this.findCommonElements(listHex, region.perimeter)) {
+                    console.log('painting region ' + region.name);
+                    Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
+                        style: {
+                            stroke: true,
+                            fill: false,
+                            weight: 5,
+                            opacity: 1,
+                            color: '#0000ff'
+                        }
+                    }).addTo(this.map);
+                }
+
+            }
+        });
+    }
+
+  drawAllRegionsOfLevel(lev:number){
     const regionsFiltred = this.zoomFilter(regions);
     regionsFiltred.forEach(region => {
       if (region.perimeter.length !== 0) {
@@ -180,38 +199,38 @@ export class MapPage implements OnInit {
       }
     });
   }
-  centerClickPoint(latlng: Leaflet.LatLng ){
-      if (this.isHexSelected) {
-        this.map.flyTo(this.bigLatLng, this.bigZoom, { animate: true, duration: 0.8 });
-      } else {
-        // Leaflet.marker(latlng, this.markerIcon).addTo(this.map); // add the marker onclick
-        this.bigLatLng = this.map.getCenter()
-        this.bigZoom = this.map.getZoom();
-        this.map.flyTo(latlng, 12, { animate: true, duration: 0.8 });
-      }
+  centerClickPoint(latlng: Leaflet.LatLng) {
+    if (this.isHexSelected) {
+      this.map.flyTo(this.bigLatLng, this.bigZoom, { animate: true, duration: 0.8 });
+    } else {
+      // Leaflet.marker(latlng, this.markerIcon).addTo(this.map); // add the marker onclick
+      this.bigLatLng = this.map.getCenter()
+      this.bigZoom = this.map.getZoom();
+      this.map.flyTo(latlng, 12, { animate: true, duration: 0.8 });
     }
+  }
 
-  zoomFilter(hexbinsOld){
+  zoomFilter(hexbinsOld) {
     const zoom = this.hexbinZoom();
     const hexbinsNew = [];
 
     hexbinsOld.forEach(element => {
-      if (element.level !== 0 && element.level === zoom){
+      if (element.level !== 0 && element.level === zoom) {
         hexbinsNew.push(element);
       }
     });
     return hexbinsNew;
   }
 
-  hexbinZoom(){
+  hexbinZoom() {
     const zoom = this.map.getZoom();
     return zoom * this.hexbinZoomBase;
   }
 
   updateMarkers() {
     this.markersLayer.clearLayers();
-    this.items.forEach(item=>{
-      let marker = Leaflet.marker({lat:item.lat, lng: item.lng}, this.markerIcon).addTo(this.markersLayer);
+    this.items.forEach(item => {
+      let marker = Leaflet.marker({ lat: item.lat, lng: item.lng }, this.markerIcon).addTo(this.markersLayer);
     })
   }
 
