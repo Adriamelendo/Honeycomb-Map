@@ -8,8 +8,6 @@ import * as Leaflet from 'leaflet';
 
 import resources from '../../assets/data/resources.json';
 import regions from '../../assets/data/regions.json';
-// console.log('resources', resources);
-// console.log('regions', regions);
 
 @Component({
   selector: 'app-map',
@@ -24,6 +22,7 @@ export class MapPage implements OnInit {
   currentCategory = '';
   items: Item[] = [];
 
+  hexbinZoomBase = 1;
 
 
   bigLatLng: Leaflet.LatLng;
@@ -50,11 +49,11 @@ export class MapPage implements OnInit {
   constructor(private data: DataService) { }
 
   ngOnInit() {
-    // this.data.getItems().subscribe((resp=>{
-    //   this.items=resp;
-    //   this.updateMarkers();
-    // }));
-    // this.data.queryAllItems();   
+    this.data.getItems().subscribe((resp=>{
+      this.items=resp;
+      this.updateMarkers();
+    }));
+    this.data.queryAllItems();
   }
 
   onChangeCategory(c: string) {
@@ -79,7 +78,7 @@ export class MapPage implements OnInit {
   }
 
   leafletMap() {
-    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 10);
+    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 6);
 
     Leaflet.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: ''
@@ -105,8 +104,6 @@ export class MapPage implements OnInit {
     return arr1.some(item => arr2.includes(item))
   }
 
-
-
   private addMargin(lat: number, lng: number, coef: number): number[] {
     const new_lat = lat + coef;
     const new_lng = lng + coef / Math.cos(lat * 0.018);
@@ -126,18 +123,11 @@ export class MapPage implements OnInit {
     const southWest = this.addMargin(bounds.getSouth(), bounds.getWest(), -coef);
 
     const listHex = h3.polyfill([northEast, [northEast[0], southWest[1]], southWest, [southWest[0], northEast[1]]], lev);
-    // Leaflet.geoJSON(geojson2h3.h3SetToFeature(listHex), {
-    //   style: {
-    //     stroke: true,
-    //     fill: false,
-    //     weight: 5,
-    //     opacity: 1,
-    //     color: '#0000ff'
-    //   }
-    // }).addTo(this.map);
+    
     console.log('current bounds contain ' + listHex.length + ' hexagons of level ' + lev);
     return listHex;
   }
+
   drawInsideRegionsOfLevel(lev: number, listHex: string[]) {
     regions.forEach(region => {
       if (region.level == lev) {
@@ -161,7 +151,7 @@ export class MapPage implements OnInit {
   drawAllRegionsOfLevel(lev: number) {
     regions.forEach(region => {
       if (region.level == lev) {
-        if (region.perimeter.length != 0) {
+        if (region.perimeter.length !== 0) {
           Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
             style: {
               stroke: true,
@@ -186,11 +176,28 @@ export class MapPage implements OnInit {
     }
   }
 
+  zoomFilter(hexbinsOld){
+    const zoom = this.hexbinZoom();
+    const hexbinsNew = [];
+
+    hexbinsOld.forEach(element => {
+      if (element.level !== 0 && element.level === zoom){
+        hexbinsNew.push(element);
+      }
+    });
+    return hexbinsNew;
+  }
+
+  hexbinZoom(){
+    const zoom = this.map.getZoom();
+    return zoom * this.hexbinZoomBase;
+  }
+
   updateMarkers() {
-    // this.markersLayer.clearLayers();
-    // this.items.forEach(item=>{      
-    //   let marker = Leaflet.marker({lat:item.lat, lng: item.lng}, this.markerIcon).addTo(this.markersLayer);           
-    // })
+    this.markersLayer.clearLayers();
+    this.items.forEach(item=>{
+      let marker = Leaflet.marker({lat:item.lat, lng: item.lng}, this.markerIcon).addTo(this.markersLayer);
+    })
   }
 
   ionViewWillLeave() {
