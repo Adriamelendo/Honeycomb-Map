@@ -4,6 +4,11 @@ import { Item } from '../interfaces/item';
 
 import * as Leaflet from 'leaflet';
 
+import resources from '../../assets/data/resources.json';
+import regions from '../../assets/data/regions.json';
+console.log('resources' , resources);
+console.log('regions' , regions);
+
 @Component({
   selector: 'app-map',
   templateUrl: './map.page.html',
@@ -17,6 +22,8 @@ export class MapPage implements OnInit {
   currentCategory = '';
   items: Item[] = [];
   
+
+
   bigLatLng: Leaflet.LatLng;
   bigZoom: number;
 
