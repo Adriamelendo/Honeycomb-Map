@@ -29,6 +29,7 @@
     "@ionic/angular": "^5.0.0",
     "@ionic/storage": "^2.2.0",
     "cordova-plugin-geolocation": "^4.0.2",
+    "h3-js": "^3.6.4",
     "leaflet": "^1.6.0",
     "parse": "^2.13.0",
     "rxjs": "~6.5.1",
