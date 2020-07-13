@@ -78,7 +78,7 @@ export class MapPage implements OnInit {
   }
 
   leafletMap() {
-    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 6);
+    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 8);
 
     Leaflet.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: ''
@@ -86,14 +86,24 @@ export class MapPage implements OnInit {
 
     this.markersLayer.addTo(this.map);
 
-    this.map.on("click", (e: Leaflet.LeafletMouseEvent) => {
-      console.log(e.latlng); // get the coordinates
-      // this.centerClickPoint(e.latlng);
-      this.toggleSelectHexagon();
+    // this.map.on("click", (e: Leaflet.LeafletMouseEvent) => {
+    //   this.toggleSelectHexagon();
+    // });
+
+    // first render
+    this.renderDemo();
+
+    // recalculate render on drag and zoom
+    this.map.on('zoomend dragend', (e: Leaflet.LeafletMouseEvent) => {
+      this.renderDemo();
     });
-    // this.drawAllRegionsOfLevel();
-    // this.drawAllRegionsOfLevel();
-    this.fromBoundsToListHexagonsOfLevel();
+
+  }
+
+  renderDemo(){
+    this.drawAllRegionsOfLevel();
+    this.drawHexbins();
+    // this.fromBoundsToListHexagonsOfLevel();
   }
 
   addMargin(lat:number,lng:number,coef:number): number[]{
@@ -128,6 +138,22 @@ export class MapPage implements OnInit {
     return listHex;
   }
 
+  drawHexbins(){
+    const hexbinsFiltred = this.zoomFilter(resources);
+    hexbinsFiltred.forEach(hexbin => {
+      if (hexbin.hex) {
+        // Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.hex), {
+        //   style: {
+        //     stroke: false,
+        //     fill: true,
+        //     fillOpacity: 0.6,
+        //     opacity: 1,
+        //   }
+        // }).addTo(this.map);
+      }
+    });
+  }
+
   drawAllRegionsOfLevel(){
     const regionsFiltred = this.zoomFilter(regions);
     regionsFiltred.forEach(region => {
@@ -136,11 +162,21 @@ export class MapPage implements OnInit {
           style: {
             stroke: true,
             fill: false,
-            weight: 5,
+            weight: 2,
             opacity: 1,
-            color: '#0000ff'
+            color: '#2e51ff'
           }
         }).addTo(this.map);
+
+        // Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(region.perimeter), {
+        //   style: {
+        //     stroke: true,
+        //     fill: false,
+        //     weight: 1,
+        //     opacity: 1,
+        //     color: '#76c0ff'
+        //   }
+        // }).addTo(this.map);
       }
     });
   }
