@@ -22,7 +22,7 @@ export class MapPage implements OnInit {
   currentCategory = '';
   items: Item[] = [];
 
-  hexbinZoomBase = 1;
+  hexbinZoomBase = 0.8;
 
 
   bigLatLng: Leaflet.LatLng;
@@ -89,7 +89,7 @@ export class MapPage implements OnInit {
   }
 
   leafletMap() {
-    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 8);
+    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 10);
 
     Leaflet.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: ''
