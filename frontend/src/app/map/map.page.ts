@@ -49,11 +49,11 @@ export class MapPage implements OnInit {
   constructor(private data: DataService) { }
 
   ngOnInit() {
-    this.data.getItems().subscribe((resp=>{
-      this.items=resp;
-      this.updateMarkers();
-    }));
-    this.data.queryAllItems();
+    // this.data.getItems().subscribe((resp=>{
+    //   this.items=resp;
+    //   this.updateMarkers();
+    // }));
+    // this.data.queryAllItems();
   }
 
   onChangeCategory(c: string) {
@@ -78,7 +78,7 @@ export class MapPage implements OnInit {
   }
 
   leafletMap() {
-    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 6);
+    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 7);
 
     Leaflet.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: ''
@@ -92,11 +92,12 @@ export class MapPage implements OnInit {
       this.toggleSelectHexagon();
     });
 
-    // this.drawAllRegionsOfLevel(8);
+    // level defined by map zoom
+    // this.drawAllRegionsOfLevel();
 
-    // const lev = 6;
-    // const currentHexList = this.fromBoundsToListHexagonsOfLevel(lev);
-    // this.drawInsideRegionsOfLevel(lev,currentHexList);
+   
+    // const currentHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom());
+    // this.drawInsideRegionsOfLevel(currentHexList);
 
   }
 
@@ -123,35 +124,17 @@ export class MapPage implements OnInit {
     const southWest = this.addMargin(bounds.getSouth(), bounds.getWest(), -coef);
 
     const listHex = h3.polyfill([northEast, [northEast[0], southWest[1]], southWest, [southWest[0], northEast[1]]], lev);
-    
+
     console.log('current bounds contain ' + listHex.length + ' hexagons of level ' + lev);
     return listHex;
   }
 
-  drawInsideRegionsOfLevel(lev: number, listHex: string[]) {
-    regions.forEach(region => {
-      if (region.level == lev) {
-        if (region.perimeter.length != 0) {
-          if (this.findCommonElements(listHex, region.perimeter)) {
-            console.log('painting region ' + region.name);
-            Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
-              style: {
-                stroke: true,
-                fill: false,
-                weight: 5,
-                opacity: 1,
-                color: '#0000ff'
-              }
-            }).addTo(this.map);
-          }
-        }
-      }
-    });
-  }
-  drawAllRegionsOfLevel(lev: number) {
-    regions.forEach(region => {
-      if (region.level == lev) {
-        if (region.perimeter.length !== 0) {
+  drawInsideRegionsOfLevel( listHex: string[]) {
+    const regionsFiltred = this.zoomFilter(regions);
+    regionsFiltred.forEach(region => {
+      if (region.perimeter.length != 0) {
+        if (this.findCommonElements(listHex, region.perimeter)) {
+          console.log('painting region ' + region.name);
           Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
             style: {
               stroke: true,
@@ -162,7 +145,25 @@ export class MapPage implements OnInit {
             }
           }).addTo(this.map);
         }
+
       }
+    });
+  }
+  drawAllRegionsOfLevel() {
+    const regionsFiltred = this.zoomFilter(regions);
+    regionsFiltred.forEach(region => {
+      if (region.perimeter.length !== 0) {
+        Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
+          style: {
+            stroke: true,
+            fill: false,
+            weight: 5,
+            opacity: 1,
+            color: '#0000ff'
+          }
+        }).addTo(this.map);
+      }
+
     });
   }
   centerClickPoint(latlng: Leaflet.LatLng) {
@@ -176,27 +177,27 @@ export class MapPage implements OnInit {
     }
   }
 
-  zoomFilter(hexbinsOld){
+  zoomFilter(hexbinsOld) {
     const zoom = this.hexbinZoom();
     const hexbinsNew = [];
 
     hexbinsOld.forEach(element => {
-      if (element.level !== 0 && element.level === zoom){
+      if (element.level !== 0 && element.level === zoom) {
         hexbinsNew.push(element);
       }
     });
     return hexbinsNew;
   }
 
-  hexbinZoom(){
+  hexbinZoom() {
     const zoom = this.map.getZoom();
     return zoom * this.hexbinZoomBase;
   }
 
   updateMarkers() {
     this.markersLayer.clearLayers();
-    this.items.forEach(item=>{
-      let marker = Leaflet.marker({lat:item.lat, lng: item.lng}, this.markerIcon).addTo(this.markersLayer);
+    this.items.forEach(item => {
+      let marker = Leaflet.marker({ lat: item.lat, lng: item.lng }, this.markerIcon).addTo(this.markersLayer);
     })
   }
 
