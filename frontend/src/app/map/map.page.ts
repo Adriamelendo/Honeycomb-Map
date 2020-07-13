@@ -7,8 +7,8 @@ import * as Leaflet from 'leaflet';
 
 import resources from '../../assets/data/resources.json';
 import regions from '../../assets/data/regions.json';
-console.log('resources' , resources);
-console.log('regions' , regions);
+// console.log('resources', resources);
+// console.log('regions', regions);
 
 @Component({
   selector: 'app-map',
@@ -22,7 +22,7 @@ export class MapPage implements OnInit {
   queryText = '';
   currentCategory = '';
   items: Item[] = [];
-  
+
 
 
   bigLatLng: Leaflet.LatLng;
@@ -57,16 +57,16 @@ export class MapPage implements OnInit {
   }
 
   onChangeCategory(c: string) {
-    this.currentCategory=c;
+    this.currentCategory = c;
   }
 
   onNewSearch(q: string) {
-    this.queryText=q;
+    this.queryText = q;
   }
 
-  toggleSelectHexagon() {    
+  toggleSelectHexagon() {
     this.isHexSelected = !this.isHexSelected;
-    if(this.isHexSelected) {
+    if (this.isHexSelected) {
       this.appMapClass = 'hide-header';
     } else {
       this.appMapClass = 'show-header';
@@ -86,33 +86,43 @@ export class MapPage implements OnInit {
 
     this.markersLayer.addTo(this.map);
 
-    this.map.on("click", (e:Leaflet.LeafletMouseEvent) => {
+    this.map.on("click", (e: Leaflet.LeafletMouseEvent) => {
       console.log(e.latlng); // get the coordinates
-      if (this.isHexSelected) {
-        this.map.flyTo(this.bigLatLng, this.bigZoom, { animate: true, duration: 0.8 });
-      } else {
-        // Leaflet.marker(e.latlng, this.markerIcon).addTo(this.map); // add the marker onclick
-        this.bigLatLng = this.map.getCenter()
-        this.bigZoom = this.map.getZoom();
-        this.map.flyTo(e.latlng, 12, { animate: true, duration: 0.8 });
-      }
+      // this.centerClickPoint(e.latlng);
       this.toggleSelectHexagon();
     });
 
-    regions.forEach(element => {  
-      if(element.perimeter.lenght!=0){    
-          Leaflet.geoJSON(geojson2h3.h3SetToFeature(element.perimeter), { style: {
-            stroke: true,
-            fill: false,
-            weight: 5,
-            opacity: 1,
-            color: '#0000ff'
-          }
-        }).addTo(this.map);
-     }
-    });
-    
+    // this.drawAllRegionsOfLevel(8);
+
   }
+
+  drawAllRegionsOfLevel(lev:number){
+    regions.forEach(region => {
+      if (region.level == lev) {
+        if (region.perimeter.length != 0) {
+          Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
+            style: {
+              stroke: true,
+              fill: false,
+              weight: 5,
+              opacity: 1,
+              color: '#0000ff'
+            }
+          }).addTo(this.map);
+        }
+      }
+    });
+  }
+  centerClickPoint(latlng: Leaflet.LatLng ){
+      if (this.isHexSelected) {
+        this.map.flyTo(this.bigLatLng, this.bigZoom, { animate: true, duration: 0.8 });
+      } else {
+        // Leaflet.marker(latlng, this.markerIcon).addTo(this.map); // add the marker onclick
+        this.bigLatLng = this.map.getCenter()
+        this.bigZoom = this.map.getZoom();
+        this.map.flyTo(latlng, 12, { animate: true, duration: 0.8 });
+      }
+    }
 
   updateMarkers() {
     // this.markersLayer.clearLayers();

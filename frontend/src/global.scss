@@ -89,7 +89,7 @@
   .right-panel {
     border-radius: 8px;
     padding: 10px;
-    transform: translateX(0);
+    transform: translateX(100vw);
     width: 300px;
     height: auto; 
     top: 132px;
@@ -98,7 +98,7 @@
     right: 10px;    
   }
   .close-panel {
-    transform: translateX(0);
+    transform: translateX(100vw);
   }
   .open-panel {
       transform: translateX(0); //-10vw to bring closer to map center    
