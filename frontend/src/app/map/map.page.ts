@@ -21,6 +21,8 @@ export class MapPage implements OnInit {
   currentCategory = '';
   items: Item[] = [];
 
+  hexbinZoomBase = 1;
+
 
 
   bigLatLng: Leaflet.LatLng;
@@ -76,7 +78,7 @@ export class MapPage implements OnInit {
   }
 
   leafletMap() {
-    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 10);
+    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 6);
 
     Leaflet.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: ''
@@ -85,7 +87,7 @@ export class MapPage implements OnInit {
     this.markersLayer.addTo(this.map);
 
     this.map.on("click", (e:Leaflet.LeafletMouseEvent) => {
-      console.log(e.latlng); // get the coordinates
+      // console.log(e.latlng); // get the coordinates
       if (this.isHexSelected) {
         this.map.flyTo(this.bigLatLng, this.bigZoom, { animate: true, duration: 0.8 });
       } else {
@@ -97,9 +99,10 @@ export class MapPage implements OnInit {
       this.toggleSelectHexagon();
     });
 
-    regions.forEach(element => {
-      if(element.perimeter.lenght!=0){
-          Leaflet.geoJSON(geojson2h3.h3SetToFeature(element.perimeter), { style: {
+    const regionsFiltred = this.zoomFilter(regions);
+    regionsFiltred.forEach(element => {
+      if (element.perimeter.length !== 0){
+        Leaflet.geoJSON(geojson2h3.h3SetToFeature(element.perimeter), { style: {
             stroke: true,
             fill: false,
             weight: 5,
@@ -107,9 +110,26 @@ export class MapPage implements OnInit {
             color: '#0000ff'
           }
         }).addTo(this.map);
-     }
+      }
     });
 
+  }
+
+  zoomFilter(hexbinsOld){
+    const zoom = this.hexbinZoom();
+    const hexbinsNew = [];
+
+    hexbinsOld.forEach(element => {
+      if (element.level !== 0 && element.level === zoom){
+        hexbinsNew.push(element);
+      }
+    });
+    return hexbinsNew;
+  }
+
+  hexbinZoom(){
+    const zoom = this.map.getZoom();
+    return zoom * this.hexbinZoomBase;
   }
 
   updateMarkers() {
