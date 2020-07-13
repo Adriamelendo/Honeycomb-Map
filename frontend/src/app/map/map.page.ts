@@ -177,15 +177,15 @@ export class MapPage implements OnInit {
           }
         }).addTo(this.map);
 
-        // Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(hexbin.perimeter), {
-        //   style: {
-        //     stroke: true,
-        //     fill: false,
-        //     weight: 1,
-        //     opacity: 1,
-        //     color: '#76c0ff'
-        //   }
-        // }).addTo(this.map);
+        Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(hexbin.perimeter), {
+          style: {
+            stroke: true,
+            fill: false,
+            weight: 1,
+            opacity: 1,
+            color: '#76c0ff'
+          }
+        }).addTo(this.map);
       }
     });
   }
