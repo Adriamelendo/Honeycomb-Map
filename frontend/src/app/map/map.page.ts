@@ -56,6 +56,17 @@ export class MapPage implements OnInit {
     // this.data.queryAllItems();
   }
 
+  updateMarkers() {
+    this.markersLayer.clearLayers();
+    this.items.forEach(item => {
+      let marker = Leaflet.marker({ lat: item.lat, lng: item.lng }, this.markerIcon).addTo(this.markersLayer);
+    })
+  }
+
+  ionViewWillLeave() {
+    this.map.remove();
+  }
+
   onChangeCategory(c: string) {
     this.currentCategory = c;
   }
@@ -95,33 +106,35 @@ export class MapPage implements OnInit {
 
     // recalculate render on drag and zoom
     this.map.on('zoomend dragend', (e: Leaflet.LeafletMouseEvent) => {
-      this.renderDemo();
+      // this.renderDemo();
     });
 
   }
 
   renderDemo(){
-    this.drawAllRegionsOfLevel();
-    this.drawHexbins();
-    // this.fromBoundsToListHexagonsOfLevel();
-    const currentHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom());
-    this.drawInsideRegionsOfLevel(currentHexList);
+    const currentHexList = this.fromBoundsToListHexagonsOfLevel();
+
+    // regions
+    this.drawRegions(this.hexbinFilter(currentHexList, regions));
+
+    // resource hexbins
+    this.drawHexbins(this.hexbinFilter(currentHexList, resources));
   }
 
   private findCommonElements(arr1, arr2) {
-    return arr1.some(item => arr2.includes(item))
+    return arr1.some(item => arr2.includes(item));
   }
 
   private addMargin(lat: number, lng: number, coef: number): number[] {
     const new_lat = lat + coef;
     const new_lng = lng + coef / Math.cos(lat * 0.018);
-    return [new_lat, new_lng]
+    return [new_lat, new_lng];
   }
 
   fromBoundsToListHexagonsOfLevel() {
     const bounds = this.map.getBounds();
 
-    const meters=h3.edgeLength(this.hexbinZoom(), 'm');
+    const meters = h3.edgeLength(this.hexbinZoom(), 'm');
     // aprox 1km in degree = 1 / 111.32km = 0.0089
     // 1m in degree = 0.0089 / 1000 = 0.0000089
     // pi / 180 = 0.018
@@ -132,52 +145,29 @@ export class MapPage implements OnInit {
 
     const listHex = h3.polyfill([northEast, [northEast[0], southWest[1]], southWest, [southWest[0], northEast[1]]], this.hexbinZoom());
 
-    console.log('current bounds contain ' + listHex.length + ' hexagons of level ' + lev);
+    console.log('current bounds contain ' + listHex.length + ' hexagons of level ' + this.hexbinZoom());
     return listHex;
   }
 
-    drawHexbins(){
-        const hexbinsFiltred = this.zoomFilter(resources);
-        hexbinsFiltred.forEach(hexbin => {
-            if (hexbin.hex) {
-                // Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.hex), {
-                //   style: {
-                //     stroke: false,
-                //     fill: true,
-                //     fillOpacity: 0.6,
-                //     opacity: 1,
-                //   }
-                // }).addTo(this.map);
-            }
-        });
-    }
+  drawHexbins(hexbins){
+    hexbins.forEach(hexbin => {
+      if (hexbin.hex) {
+        Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.hex), {
+          style: {
+            stroke: false,
+            fill: true,
+            fillOpacity: 0.6,
+            opacity: 1,
+          }
+        }).addTo(this.map);
+      }
+    });
+  }
 
-    drawInsideRegionsOfLevel( listHex: string[]) {
-        const regionsFiltred = this.zoomFilter(regions);
-        regionsFiltred.forEach(region => {
-            if (region.perimeter.length != 0) {
-                if (this.findCommonElements(listHex, region.perimeter)) {
-                    console.log('painting region ' + region.name);
-                    Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
-                        style: {
-                            stroke: true,
-                            fill: false,
-                            weight: 5,
-                            opacity: 1,
-                            color: '#0000ff'
-                        }
-                    }).addTo(this.map);
-                }
-
-            }
-        });
-    }
-
-  drawAllRegionsOfLevel(lev:number){
-    const regionsFiltred = this.zoomFilter(regions);
-    regionsFiltred.forEach(region => {
-      if (region.perimeter.length !== 0) {
-        Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
+  drawRegions(hexbins){
+    hexbins.forEach(hexbin => {
+      if (hexbin.perimeter.length !== 0) {
+        Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.perimeter), {
           style: {
             stroke: true,
             fill: false,
@@ -187,7 +177,7 @@ export class MapPage implements OnInit {
           }
         }).addTo(this.map);
 
-        // Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(region.perimeter), {
+        // Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(hexbin.perimeter), {
         //   style: {
         //     stroke: true,
         //     fill: false,
@@ -199,27 +189,35 @@ export class MapPage implements OnInit {
       }
     });
   }
-  centerClickPoint(latlng: Leaflet.LatLng) {
-    if (this.isHexSelected) {
-      this.map.flyTo(this.bigLatLng, this.bigZoom, { animate: true, duration: 0.8 });
-    } else {
-      // Leaflet.marker(latlng, this.markerIcon).addTo(this.map); // add the marker onclick
-      this.bigLatLng = this.map.getCenter()
-      this.bigZoom = this.map.getZoom();
-      this.map.flyTo(latlng, 12, { animate: true, duration: 0.8 });
-    }
-  }
 
-  zoomFilter(hexbinsOld) {
+  zoomFilter(hexbins) {
     const zoom = this.hexbinZoom();
     const hexbinsNew = [];
-
-    hexbinsOld.forEach(element => {
-      if (element.level !== 0 && element.level === zoom) {
-        hexbinsNew.push(element);
+    hexbins.forEach(hexbin => {
+      if (hexbin.level !== 0 && hexbin.level === zoom) {
+        hexbinsNew.push(hexbin);
       }
     });
     return hexbinsNew;
+  }
+
+  boxFilter(listHex, hexbins){
+    const hexbinsNew = [];
+    hexbins.forEach(hexbin => {
+      // if (this.findCommonElements(hexbin.perimeter, listHex)) {
+        hexbinsNew.push(hexbin);
+      // }
+      console.log('Painting region ' + hexbin.name);
+    });
+    return hexbinsNew;
+  }
+
+  hexbinFilter(listHex, hexbins){
+    const hexbinsZoomFiltred = this.zoomFilter(hexbins);
+    console.log('Current bounds contain ' + hexbinsZoomFiltred.length + ' hexagons');
+    const hexbinsBoxFiltred = this.boxFilter(listHex, hexbinsZoomFiltred);
+    console.log('Current bounds contain ' + hexbinsBoxFiltred.length + ' hexagons');
+    return hexbinsBoxFiltred;
   }
 
   hexbinZoom() {
@@ -227,14 +225,4 @@ export class MapPage implements OnInit {
     return zoom * this.hexbinZoomBase;
   }
 
-  updateMarkers() {
-    this.markersLayer.clearLayers();
-    this.items.forEach(item => {
-      let marker = Leaflet.marker({ lat: item.lat, lng: item.lng }, this.markerIcon).addTo(this.markersLayer);
-    })
-  }
-
-  ionViewWillLeave() {
-    this.map.remove();
-  }
 }
