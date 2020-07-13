@@ -9,23 +9,25 @@ function writeJSON(path, data) {
   fs.writeFileSync(path, JSON.stringify(data, null, 4));
 }
 
-function convertTown(rawTown) {
+function convertTown(rawTown, level) {
   return {
     id: rawTown.recordid,
     name: rawTown.fields.municipio,
+    type: 'town',
     // province: rawTown.fields.provincia,
     // state: rawTown.fields.communidad_autonoma,
-    level: 7,
-    perimeter: h3.polyfill(rawTown.fields.geo_shape.coordinates, 7, true),
+    level: level,
+    perimeter: h3.polyfill(rawTown.fields.geo_shape.coordinates, level, true),
   };
 }
 
-function convertProvince(rawProvince) {
+function convertProvince(rawProvince, level) {
   return {
     id: rawProvince.recordid,
     name: rawProvince.fields.nameunit,
-    level: 6,
-    perimeter: h3.polyfill(rawProvince.fields.geo_shape.coordinates, 6, true),
+    type: 'province',
+    level: level,
+    perimeter: h3.polyfill(rawProvince.fields.geo_shape.coordinates, level, true),
   };
 }
 
@@ -43,7 +45,11 @@ function convertResource(rawResource) {
 
 rawTowns = loadJSON(process.argv[2]).records;
 rawProvinces = loadJSON(process.argv[3]).records;
-regions = rawTowns.map(convertTown).concat(rawProvinces.map(convertProvince));
+regions = rawTowns.map((town) => convertTown(town, 7))
+  .concat(rawTowns.map((town) => convertTown(town, 8)))
+  .concat(rawProvinces.map((prov) => convertProvince(prov, 6)))
+  .concat(rawProvinces.map((prov) => convertProvince(prov, 7)))
+  .concat(rawProvinces.map((prov) => convertProvince(prov, 8)));
 
 // regions.forEach((region) => {
 //   console.log(region.id, region.name);
