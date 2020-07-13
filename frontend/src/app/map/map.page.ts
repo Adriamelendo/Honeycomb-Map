@@ -24,7 +24,6 @@ export class MapPage implements OnInit {
   hexbinZoomBase = 1;
 
 
-
   bigLatLng: Leaflet.LatLng;
   bigZoom: number;
 
@@ -57,16 +56,16 @@ export class MapPage implements OnInit {
   }
 
   onChangeCategory(c: string) {
-    this.currentCategory=c;
+    this.currentCategory = c;
   }
 
   onNewSearch(q: string) {
-    this.queryText=q;
+    this.queryText = q;
   }
 
   toggleSelectHexagon() {
     this.isHexSelected = !this.isHexSelected;
-    if(this.isHexSelected) {
+    if (this.isHexSelected) {
       this.appMapClass = 'hide-header';
     } else {
       this.appMapClass = 'show-header';
@@ -86,23 +85,22 @@ export class MapPage implements OnInit {
 
     this.markersLayer.addTo(this.map);
 
-    this.map.on("click", (e:Leaflet.LeafletMouseEvent) => {
-      // console.log(e.latlng); // get the coordinates
-      if (this.isHexSelected) {
-        this.map.flyTo(this.bigLatLng, this.bigZoom, { animate: true, duration: 0.8 });
-      } else {
-        // Leaflet.marker(e.latlng, this.markerIcon).addTo(this.map); // add the marker onclick
-        this.bigLatLng = this.map.getCenter()
-        this.bigZoom = this.map.getZoom();
-        this.map.flyTo(e.latlng, 12, { animate: true, duration: 0.8 });
-      }
+    this.map.on("click", (e: Leaflet.LeafletMouseEvent) => {
+      console.log(e.latlng); // get the coordinates
+      // this.centerClickPoint(e.latlng);
       this.toggleSelectHexagon();
     });
 
+    this.drawAllRegionsOfLevel(6);
+
+  }
+
+  drawAllRegionsOfLevel(lev:number){
     const regionsFiltred = this.zoomFilter(regions);
-    regionsFiltred.forEach(element => {
-      if (element.perimeter.length !== 0){
-        Leaflet.geoJSON(geojson2h3.h3SetToFeature(element.perimeter), { style: {
+    regionsFiltred.forEach(region => {
+      if (region.perimeter.length !== 0) {
+        Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
+          style: {
             stroke: true,
             fill: false,
             weight: 5,
@@ -112,8 +110,18 @@ export class MapPage implements OnInit {
         }).addTo(this.map);
       }
     });
-
+    
   }
+  centerClickPoint(latlng: Leaflet.LatLng ){
+      if (this.isHexSelected) {
+        this.map.flyTo(this.bigLatLng, this.bigZoom, { animate: true, duration: 0.8 });
+      } else {
+        // Leaflet.marker(latlng, this.markerIcon).addTo(this.map); // add the marker onclick
+        this.bigLatLng = this.map.getCenter()
+        this.bigZoom = this.map.getZoom();
+        this.map.flyTo(latlng, 12, { animate: true, duration: 0.8 });
+      }
+    }
 
   zoomFilter(hexbinsOld){
     const zoom = this.hexbinZoom();
