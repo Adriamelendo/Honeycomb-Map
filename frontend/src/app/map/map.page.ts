@@ -2,6 +2,7 @@ import { Component, OnInit, HostBinding } from '@angular/core';
 import { DataService } from '../services/data.service';
 import { Item } from '../interfaces/item';
 import * as geojson2h3 from 'geojson2h3';
+import * as h3 from 'h3-js';
 
 import * as Leaflet from 'leaflet';
 
@@ -90,9 +91,40 @@ export class MapPage implements OnInit {
       // this.centerClickPoint(e.latlng);
       this.toggleSelectHexagon();
     });
+    // this.drawAllRegionsOfLevel(8);
+    this.fromBoundsToListHexagonsOfLevel(6);
+  }
 
-    this.drawAllRegionsOfLevel(6);
+  addMargin(lat:number,lng:number,coef:number): number[]{
+    const new_lat = lat + coef;
+    const new_lng = lng + coef / Math.cos(lat * 0.018);
+    return [new_lat,new_lng]
+  }
 
+  fromBoundsToListHexagonsOfLevel(lev:number) {
+    const bounds = this.map.getBounds();
+
+    const meters=h3.edgeLength(lev, 'm');
+    // aprox 1km in degree = 1 / 111.32km = 0.0089
+    // 1m in degree = 0.0089 / 1000 = 0.0000089
+    // pi / 180 = 0.018
+    const coef = meters * 1.5 * 0.0000089;
+
+    const northEast = this.addMargin(bounds.getNorth(),bounds.getEast(),coef);
+    const southWest = this.addMargin(bounds.getSouth(),bounds.getWest(),-coef);
+
+    const listHex=h3.polyfill([northEast,[northEast[0],southWest[1]],southWest,[southWest[0],northEast[1]]], lev);
+    // Leaflet.geoJSON(geojson2h3.h3SetToFeature(listHex), {
+    //   style: {
+    //     stroke: true,
+    //     fill: false,
+    //     weight: 5,
+    //     opacity: 1,
+    //     color: '#0000ff'
+    //   }
+    // }).addTo(this.map);
+    console.log('current bounds contain '+listHex.length+' hexagons of level '+lev);
+    return listHex;
   }
 
   drawAllRegionsOfLevel(lev:number){
@@ -110,7 +142,6 @@ export class MapPage implements OnInit {
         }).addTo(this.map);
       }
     });
-    
   }
   centerClickPoint(latlng: Leaflet.LatLng ){
       if (this.isHexSelected) {
