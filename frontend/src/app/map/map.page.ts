@@ -78,7 +78,7 @@ export class MapPage implements OnInit {
   }
 
   leafletMap() {
-    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 7);
+    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 6);
 
     Leaflet.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: ''
@@ -96,8 +96,8 @@ export class MapPage implements OnInit {
     // this.drawAllRegionsOfLevel();
 
    
-    // const currentHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom());
-    // this.drawInsideRegionsOfLevel(currentHexList);
+    const currentHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom());
+    this.drawInsideRegionsOfLevel(currentHexList);
 
   }
 
