@@ -199,10 +199,7 @@ export class MapPage implements OnInit {
         feature.on({
           mouseover: (evt) => {
             // console.log('he entrado en '+resource);
-            const resources = this.resourcesByHex[resource.hex];
-            if (resources) {
-              resources.forEach((res) => console.log(res.title));
-            }
+            this.items = this.resourcesByHex[resource.hex];            
           },
         });
       }
