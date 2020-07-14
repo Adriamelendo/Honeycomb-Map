@@ -147,7 +147,7 @@ export class MapPage implements OnInit {
     console.log('regionsToDraw: ', regionsToDraw);
 
     // resources
-    this.drawResources(this.resourceFilter(this.viewHexList, resources));
+    this.drawResources(this.zoomFilter(resources));
   }
 
   // TODO reduce duplicates
@@ -201,10 +201,11 @@ export class MapPage implements OnInit {
             opacity: 1,
           }
         }).addTo(this.hexLayer[level]);
+
+        // add hover effect to show data
         feature.on({
           mouseover: (evt) => {
-            // console.log('he entrado en '+resource);
-            this.items = this.resourcesByHex[resource.hex];            
+            this.items = this.resourcesByHex[resource.hex];
           }, mouseout: (evt) => {
             this.items = [];
           }
@@ -272,12 +273,6 @@ export class MapPage implements OnInit {
     ).map(
       (region) => region.name
     );
-  }
-
-  resourceFilter(listHex, resources) {
-    const resourcesZoomFiltred = this.zoomFilter(resources);
-    console.log('Current zoom contain ' + resourcesZoomFiltred.length + ' resourcesZoomFiltred');
-    return resourcesZoomFiltred;
   }
 
   // TODO automatic hexZoom level
