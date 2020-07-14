@@ -7,7 +7,7 @@ import * as h3 from 'h3-js';
 import * as Leaflet from 'leaflet';
 
 import resources from '../../assets/data/resources.json';
-import regions from '../../assets/data/regions.json';
+import regions from '../../assets/data/mini_regions.json';
 
 @Component({
   selector: 'app-map',
@@ -262,10 +262,37 @@ export class MapPage implements OnInit {
   }
 
   regionFilter(listHex, regions): string[] {
+    console.log('listHex: ',listHex);
+    listHex.forEach(hex => {
+        Leaflet.geoJSON(geojson2h3.h3ToFeature(hex), {
+          style: {
+            stroke: true,
+            fill: false,
+            color: '#ff0000'
+          }
+        }).addTo(this.map);
+      });
     return regions.filter(
-      (region) => this.findCommonElements(region.perimeter, listHex)
+      (region) => {
+        console.log('region '+region.name+' with hex: ',region.perimeter);
+        region.perimeter.forEach(hex => {
+          Leaflet.geoJSON(geojson2h3.h3ToFeature(hex), {
+            style: {
+              stroke: true,
+              fill: false,
+              color: '#00ff00'
+            }
+          }).addTo(this.map);
+        });
+        const toreturn= this.findCommonElements(region.perimeter, listHex);
+        console.log('findCommonElements: ', toreturn);
+        return toreturn;
+      }
     ).map(
-      (region) => region.name
+      (region) => {
+        console.log('found intersection: '+ region.name)
+        return region.name
+      }
     );
   }
 
