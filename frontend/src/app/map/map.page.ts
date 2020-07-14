@@ -121,15 +121,27 @@ export class MapPage implements OnInit {
     this.viewHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom());
     this.searchHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom() - 2);
 
-    const listRegions = this.boxFilter(this.searchHexList, regions[this.hexbinZoom()-2] || [], this.hexbinZoom() - 2 );
+    const listRegions = this.boxFilter(this.searchHexList, regions[this.hexbinZoom()-2] || [] );
 
     console.log('listRegions: ', listRegions);
     // regions
-    //this.drawRegions(this.hexbinFilter(listRegions, regions));
+    const regionsToDraw=this.regionsInList(listRegions, regions[this.hexbinZoom()]);
+    console.log('regionsToDraw: ', regionsToDraw);
+    this.drawRegions(regionsToDraw);
     // resource hexbins
     //this.drawHexbins(this.hexbinFilter(currentHexList, resources));
   }
 
+  regionsInList(listNames:string[], hexbins: any[]) {
+    const hexbinsNew = [];   
+    hexbins.forEach(hexbin => {      
+        if (listNames.indexOf(hexbin.name) != -1 ) {
+          hexbinsNew.push(hexbin);
+        }     
+      //console.log('Painting region ' + hexbin.name);
+    });
+    return hexbinsNew;
+  }
 
   private findCommonElements(arr1, arr2) {
     return arr1.some(item => arr2.includes(item));
@@ -180,7 +192,7 @@ export class MapPage implements OnInit {
     if (!this.hexLayer[lev]) {
       this.hexLayer[lev] = new Leaflet.LayerGroup();
       hexbins.forEach(hexbin => {
-        if (hexbin.perimeter.length !== 0) {
+        if (hexbin && hexbin.perimeter && hexbin.perimeter.length !== 0) {
           if (hexbin.type === 'province') {
             Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.perimeter), {
               style: {
@@ -234,7 +246,7 @@ export class MapPage implements OnInit {
     return hexbinsNew;
   }
 
-  boxFilter(listHex, hexbins, level) {
+  boxFilter(listHex, hexbins): string[] {
     const hexbinsNew = [];
     console.log(hexbins);
     hexbins.forEach(hexbin => {      
