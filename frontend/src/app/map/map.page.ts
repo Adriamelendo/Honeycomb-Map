@@ -116,16 +116,19 @@ export class MapPage implements OnInit {
 
   renderDemo() {
     console.log('Map zoom: ', this.map.getZoom());
-    console.log('Hex zoom: ', this.hexbinZoom());
+    const viewLevel = this.hexbinZoom();
+    console.log('Hex view level: ', this.hexbinZoom());
+    const searchLevel = this.hexbinZoom()-2;
+    console.log('Hex search level: ', searchLevel);
 
-    this.viewHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom());
-    this.searchHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom() - 2);
+    this.viewHexList = this.fromBoundsToListHexagonsOfLevel(viewLevel);
+    this.searchHexList = this.fromBoundsToListHexagonsOfLevel(searchLevel);
 
-    const listRegions = this.boxFilter(this.searchHexList, regions[this.hexbinZoom()-2] || [] );
+    const listRegions = this.boxFilter(this.searchHexList, regions[searchLevel] || [] );
 
     console.log('listRegions: ', listRegions);
     // regions
-    const regionsToDraw=this.regionsInList(listRegions, regions[this.hexbinZoom()] || []);
+    const regionsToDraw=this.regionsInList(listRegions, regions[viewLevel] || []);
     console.log('regionsToDraw: ', regionsToDraw);
     this.drawRegions(regionsToDraw);
     // resource hexbins
