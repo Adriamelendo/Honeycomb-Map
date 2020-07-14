@@ -143,7 +143,7 @@ export class MapPage implements OnInit {
     console.log('regionsToDraw: ', regionsToDraw);
     this.drawRegions(regionsToDraw);
     // resource hexbins
-    //this.drawHexbins(this.hexbinFilter(currentHexList, resources));
+    this.drawHexbins(this.viewHexList);
   }
 
   regionsInList(listNames:string[], hexbins: any[]) {

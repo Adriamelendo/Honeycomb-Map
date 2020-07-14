@@ -1,0 +1,1 @@
+inside folder frontend: node scripts/convert-regions.js src/assets/data/municipios-combinado.json src/assets/data/provincias.json src/assets/data/points-flc.json src/assets/data/regions.json src/assets/data/resources.json
