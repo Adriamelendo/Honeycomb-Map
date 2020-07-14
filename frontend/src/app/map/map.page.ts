@@ -267,7 +267,7 @@ export class MapPage implements OnInit {
     );
   }
 
-  // TODO automatic hexZoom level
+  // TODO automatic hexZoom level factor 0.666666
   getHexLevel() {
     const zoom = this.map.getZoom();
     let level = 0;
@@ -339,7 +339,8 @@ export class MapPage implements OnInit {
         break;
       }
     }
-    return level; // zoom * this.hexbinZoomBase;
+
+    return level; // MapZoom * 0,66666;
   }
 
 }
