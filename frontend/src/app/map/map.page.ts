@@ -252,17 +252,6 @@ export class MapPage implements OnInit {
 
   }
 
-  zoomFilter(hexbins) {
-    const zoom = this.hexbinZoom();
-    const hexbinsNew = [];
-    hexbins.forEach(hexbin => {
-      if (hexbin.level !== 0 && hexbin.level === zoom) {
-        hexbinsNew.push(hexbin);
-      }
-    });
-    return hexbinsNew;
-  }
-
   boxFilter(listHex, hexbins): string[] {
     const hexbinsNew = [];
     console.log(hexbins);
