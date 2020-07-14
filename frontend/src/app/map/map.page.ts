@@ -25,6 +25,8 @@ export class MapPage implements OnInit {
 
   hexbinZoomBase = 0.8;
 
+  viewHexList = [];
+  searchHexList = [];
 
   bigLatLng: Leaflet.LatLng;
   bigZoom: number;
@@ -116,14 +118,18 @@ export class MapPage implements OnInit {
     console.log('Map zoom: ', this.map.getZoom());
     console.log('Hex zoom: ', this.hexbinZoom());
 
-    const currentHexList = this.fromBoundsToListHexagonsOfLevel();
+    this.viewHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom());
+    this.searchHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom() + 2);
 
+    const listRegions = this.boxFilter(this.searchHexList, regions[this.hexbinZoom()] || [], this.hexbinZoom() + 2 );
+
+    console.log('listRegions: ', listRegions);
     // regions
-    this.drawRegions(regions[this.hexbinZoom()] || []);
-
+    //this.drawRegions(this.hexbinFilter(listRegions, regions));
     // resource hexbins
     this.drawHexbins(this.hexbinFilter(currentHexList, resources));
   }
+
 
   private findCommonElements(arr1, arr2) {
     return arr1.some(item => arr2.includes(item));
@@ -135,7 +141,7 @@ export class MapPage implements OnInit {
     return [new_lat, new_lng];
   }
 
-  fromBoundsToListHexagonsOfLevel(lev: number = this.hexbinZoom()) {
+  fromBoundsToListHexagonsOfLevel(lev: number) {
     const bounds = this.map.getBounds();
 
     const meters = h3.edgeLength(lev, 'm');
@@ -228,13 +234,15 @@ export class MapPage implements OnInit {
     return hexbinsNew;
   }
 
-  boxFilter(listHex, hexbins) {
+  boxFilter(listHex, hexbins, level) {
     const hexbinsNew = [];
     hexbins.forEach(hexbin => {
-      // if (this.findCommonElements(hexbin.perimeter, listHex)) {
-      hexbinsNew.push(hexbin);
-      // }
-      /* console.log('Painting region ' + hexbin.name); */
+      if (hexbin.level == level) {
+        if (this.findCommonElements(hexbin.perimeter, listHex)) {
+          hexbinsNew.push(hexbin.name);
+        }
+      }
+      //console.log('Painting region ' + hexbin.name);
     });
     return hexbinsNew;
   }
