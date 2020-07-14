@@ -129,13 +129,13 @@ export class MapPage implements OnInit {
     // 2 levels offset to optimize filters
     const searchLevel = viewLevel - 2;
 
-    console.log('Map zoom: ', this.map.getZoom());
-    console.log('Hex view level: ', viewLevel);
-    console.log('Hex search level: ', searchLevel);
-
     // get hexagons of box of visible map
-    this.viewHexList = this.fromBoundsToListHexagonsOfLevel(viewLevel);
-    this.searchHexList = this.fromBoundsToListHexagonsOfLevel(searchLevel);
+    this.viewHexList = this.getAllActiveZoneHexagons(viewLevel);
+    this.searchHexList = this.getAllActiveZoneHexagons(searchLevel);
+
+    console.log('Map zoom: ', this.map.getZoom());
+    console.log('Hex view level: ' + viewLevel + '; //are ' + this.viewHexList.length + ' hexagons');
+    console.log('Hex search level: ' + searchLevel + '; //are ' + this.searchHexList.length + ' hexagons');
 
     // filter regions to only current level with offset
     const listRegions = this.regionFilter(this.searchHexList, regions[searchLevel] || [] );
@@ -161,15 +161,13 @@ export class MapPage implements OnInit {
     return arr1.some(item => arr2.includes(item));
   }
 
-  // TODO rename function
-  private addMargin(lat: number, lng: number, coef: number): number[] {
-    const new_lat = lat + coef;
-    const new_lng = lng + coef / Math.cos(lat * 0.018);
-    return [new_lat, new_lng];
+  private addBoundsMargin(lat: number, lng: number, coef: number): number[] {
+    const newLat = lat + coef;
+    const newLng = lng + coef / Math.cos(lat * 0.018);
+    return [newLat, newLng];
   }
 
-  // TODO rename function
-  fromBoundsToListHexagonsOfLevel(level: number) {
+  getAllActiveZoneHexagons(level: number) {
     const bounds = this.map.getBounds();
 
     const meters = h3.edgeLength(level, 'm');
@@ -178,16 +176,12 @@ export class MapPage implements OnInit {
     // pi / 180 = 0.018
     const coef = meters * 1.5 * 0.0000089;
 
-    const northEast = this.addMargin(bounds.getNorth(), bounds.getEast(), coef);
-    const southWest = this.addMargin(bounds.getSouth(), bounds.getWest(), -coef);
+    const northEast = this.addBoundsMargin(bounds.getNorth(), bounds.getEast(), coef);
+    const southWest = this.addBoundsMargin(bounds.getSouth(), bounds.getWest(), -coef);
 
-    const listHex = h3.polyfill([northEast, [northEast[0], southWest[1]], southWest, [southWest[0], northEast[1]]], level);
-
-    console.log('level = ' + level + '; //are ' + listHex.length + ' hexagons');
-    return listHex;
+    return h3.polyfill([northEast, [northEast[0], southWest[1]], southWest, [southWest[0], northEast[1]]], level);
   }
 
-  // TODO add LayerGroup
   drawResources(resources) {
     const level = this.hexbinZoom();
     resources.forEach(resource => {
