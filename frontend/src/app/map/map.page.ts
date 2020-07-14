@@ -124,25 +124,32 @@ export class MapPage implements OnInit {
   }
 
   renderDemo() {
-    console.log('Map zoom: ', this.map.getZoom());
+    // get zoom level
     const viewLevel = this.hexbinZoom();
-    console.log('Hex view level: ', viewLevel);
+    // 2 levels offset to optimize filters
     const searchLevel = viewLevel - 2;
+
+    console.log('Map zoom: ', this.map.getZoom());
+    console.log('Hex view level: ', viewLevel);
     console.log('Hex search level: ', searchLevel);
 
+    // get hexagons of box of visible map
     this.searchHexList = this.fromBoundsToListHexagonsOfLevel(searchLevel);
 
+    // filter regions to only current level with offset
     const listRegions = this.boxFilter(this.searchHexList, regions[searchLevel] || [] );
 
-    console.log('listRegions: ', listRegions);
     // regions
     const regionsToDraw = this.regionsInList(listRegions, regions[viewLevel] || []);
-    console.log('regionsToDraw: ', regionsToDraw);
     this.drawRegions(regionsToDraw);
+    console.log('listRegions: ', listRegions);
+    console.log('regionsToDraw: ', regionsToDraw);
+
     // resource hexbins
     // this.drawHexbins(this.searchHexList);
   }
 
+  // TODO rename function
   regionsInList(listNames: string[], hexbins: any[]) {
     const hexbinsNew = [];
     hexbins.forEach(hexbin => {
@@ -157,12 +164,14 @@ export class MapPage implements OnInit {
     return arr1.some(item => arr2.includes(item));
   }
 
+  // TODO rename function
   private addMargin(lat: number, lng: number, coef: number): number[] {
     const new_lat = lat + coef;
     const new_lng = lng + coef / Math.cos(lat * 0.018);
     return [new_lat, new_lng];
   }
 
+  // TODO rename function
   fromBoundsToListHexagonsOfLevel(lev: number) {
     const bounds = this.map.getBounds();
 
@@ -204,6 +213,7 @@ export class MapPage implements OnInit {
     });
   }
 
+  // TODO rename hexbins variables
   drawRegions(hexbins) {
     const lev = this.hexbinZoom();
     if (!this.hexLayer[lev]) {
@@ -252,9 +262,9 @@ export class MapPage implements OnInit {
 
   }
 
+  // TODO rename hexbins variables
   boxFilter(listHex, hexbins): string[] {
     const hexbinsNew = [];
-    console.log(hexbins);
     hexbins.forEach(hexbin => {
         if (this.findCommonElements(hexbin.perimeter, listHex)) {
           hexbinsNew.push(hexbin.name);
@@ -263,6 +273,7 @@ export class MapPage implements OnInit {
     return hexbinsNew;
   }
 
+  // TODO automatic hexZoom level
   hexbinZoom() {
     const zoom = this.map.getZoom();
     let level = 0;
