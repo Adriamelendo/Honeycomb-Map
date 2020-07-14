@@ -186,26 +186,25 @@ export class MapPage implements OnInit {
   }
 
   drawHexbins(hexbins) {
-    hexbins.forEach(hexbin => {
-      if (hexbin.hex) {
-        const resource = Leaflet.geoJSON(geojson2h3.h3ToFeature(hexbin.hex), {
+    hexbins.forEach(hexbin => {      
+        const resource = Leaflet.geoJSON(geojson2h3.h3ToFeature(hexbin), {
           style: {
             stroke: false,
             fill: true,
             fillColor: '#756bb1',
-            fillOpacity: 0.6,
+            fillOpacity: 0.3,
             opacity: 1,
           }
         }).addTo(this.map);
         resource.on({
           mouseover: (evt) => {
-            const resources = this.resourcesByHex[hexbin.hex];
+            console.log('he entrado en '+hexbin);
+            const resources = this.resourcesByHex[hexbin];
             if (resources) {
               resources.forEach((res) => console.log(res.title));
             }
           },
         });
-      }
     });
   }
 
