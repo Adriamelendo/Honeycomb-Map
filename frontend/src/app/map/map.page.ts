@@ -23,8 +23,6 @@ export class MapPage implements OnInit {
   currentCategory = '';
   items: Item[] = [];
 
-  hexbinZoomBase = 0.8;
-
   viewHexList = [];
   searchHexList = [];
 
@@ -125,7 +123,7 @@ export class MapPage implements OnInit {
 
   renderDemo() {
     // get zoom level
-    const viewLevel = this.hexbinZoom();
+    const viewLevel = this.getHexLevel();
     // 2 levels offset to optimize filters
     const searchLevel = viewLevel - 2;
 
@@ -183,7 +181,7 @@ export class MapPage implements OnInit {
   }
 
   drawResources(resources) {
-    const level = this.hexbinZoom();
+    const level = this.getHexLevel();
     resources.forEach(resource => {
       if (resource.hex) {
         const feature = Leaflet.geoJSON(geojson2h3.h3ToFeature(resource.hex), {
@@ -209,7 +207,7 @@ export class MapPage implements OnInit {
   }
 
   drawRegions(regions) {
-    const level = this.hexbinZoom();
+    const level = this.getHexLevel();
     if (!this.hexLayer[level]) {
       this.hexLayer[level] = new Leaflet.LayerGroup();
       regions.forEach(region => {
@@ -257,7 +255,7 @@ export class MapPage implements OnInit {
   }
 
   zoomFilter(items) {
-    const zoom = this.hexbinZoom();
+    const zoom = this.getHexLevel();
     return items.filter((item) => item.level === zoom);
   }
 
@@ -270,7 +268,7 @@ export class MapPage implements OnInit {
   }
 
   // TODO automatic hexZoom level
-  hexbinZoom() {
+  getHexLevel() {
     const zoom = this.map.getZoom();
     let level = 0;
     switch (zoom) {
