@@ -134,10 +134,11 @@ export class MapPage implements OnInit {
     console.log('Hex search level: ', searchLevel);
 
     // get hexagons of box of visible map
+    this.viewHexList = this.fromBoundsToListHexagonsOfLevel(viewLevel);
     this.searchHexList = this.fromBoundsToListHexagonsOfLevel(searchLevel);
 
     // filter regions to only current level with offset
-    const listRegions = this.boxFilter(this.searchHexList, regions[searchLevel] || [] );
+    const listRegions = this.regionFilter(this.searchHexList, regions[searchLevel] || [] );
 
     // regions
     const regionsToDraw = this.regionsInList(listRegions, regions[viewLevel] || []);
@@ -145,19 +146,14 @@ export class MapPage implements OnInit {
     console.log('listRegions: ', listRegions);
     console.log('regionsToDraw: ', regionsToDraw);
 
-    // resource hexbins
-    // this.drawHexbins(this.searchHexList);
+    // resources
+    this.drawResources(this.resourceFilter(this.viewHexList, resources));
   }
 
-  // TODO rename function
-  regionsInList(listNames: string[], hexbins: any[]) {
-    const hexbinsNew = [];
-    hexbins.forEach(hexbin => {
-        if (listNames.indexOf(hexbin.name) !== -1 ) {
-          hexbinsNew.push(hexbin);
-        }
-    });
-    return hexbinsNew;
+  regionsInList(listNames:string[], regions: any[]) {
+    return regions.filter(
+      (region) => (listNames.indexOf(region.name) !== -1)
+    );
   }
 
   private findCommonElements(arr1, arr2) {
@@ -190,9 +186,11 @@ export class MapPage implements OnInit {
     return listHex;
   }
 
-  drawHexbins(hexbins) {
-    hexbins.forEach(hexbin => {      
-        const resource = Leaflet.geoJSON(geojson2h3.h3ToFeature(hexbin), {
+  drawResources(resources) {
+    const lev = this.hexbinZoom();
+    resources.forEach(resource => {
+      if (resource.hex) {
+        const feature = Leaflet.geoJSON(geojson2h3.h3ToFeature(resource.hex), {
           style: {
             stroke: false,
             fill: true,
@@ -200,28 +198,28 @@ export class MapPage implements OnInit {
             fillOpacity: 0.3,
             opacity: 1,
           }
-        }).addTo(this.map);
-        resource.on({
+        }).addTo(this.hexLayer[lev]);
+        feature.on({
           mouseover: (evt) => {
-            // console.log('he entrado en '+hexbin);
-            const resources = this.resourcesByHex[hexbin];
+            // console.log('he entrado en '+resource);
+            const resources = this.resourcesByHex[resource.hex];
             if (resources) {
               resources.forEach((res) => console.log(res.title));
             }
           },
         });
+      }
     });
   }
 
-  // TODO rename hexbins variables
-  drawRegions(hexbins) {
+  drawRegions(regions) {
     const lev = this.hexbinZoom();
     if (!this.hexLayer[lev]) {
       this.hexLayer[lev] = new Leaflet.LayerGroup();
-      hexbins.forEach(hexbin => {
-        if (hexbin && hexbin.perimeter && hexbin.perimeter.length !== 0) {
-          if (hexbin.type === 'province') {
-            Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.perimeter), {
+      regions.forEach(region => {
+        if (region && region.perimeter && region.perimeter.length !== 0) {
+          if (region.type === 'province') {
+            Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
               style: {
                 stroke: true,
                 fill: false,
@@ -230,8 +228,8 @@ export class MapPage implements OnInit {
                 color: '#fd8d3c'
               }
             }).addTo(this.hexLayer[lev]);
-          } else if (hexbin.type === 'town') {
-            Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.perimeter), {
+          } else if (region.type === 'town') {
+            Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
               style: {
                 stroke: true,
                 fill: false,
@@ -241,7 +239,7 @@ export class MapPage implements OnInit {
               }
             }).addTo(this.hexLayer[lev]);
 
-            Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(hexbin.perimeter), {
+            Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(region.perimeter), {
               style: {
                 stroke: true,
                 fill: false,
@@ -262,16 +260,24 @@ export class MapPage implements OnInit {
 
   }
 
-  // TODO rename hexbins variables
-  boxFilter(listHex, hexbins): string[] {
-    const hexbinsNew = [];
-    hexbins.forEach(hexbin => {
-        if (this.findCommonElements(hexbin.perimeter, listHex)) {
-          hexbinsNew.push(hexbin.name);
-        }
-    });
-    return hexbinsNew;
-  }
+    zoomFilter(hexbins) {
+        const zoom = this.hexbinZoom();
+        return hexbins.filter((hexbin) => hexbin.level === zoom);
+    }
+
+    regionFilter(listHex, regions): string[] {
+        return regions.filter(
+            (region) => this.findCommonElements(region.perimeter, listHex)
+        ).map(
+            (region) => region.name
+        );
+    }
+
+    resourceFilter(listHex, resources) {
+        const resourcesZoomFiltred = this.zoomFilter(resources);
+        console.log('Current zoom contain ' + resourcesZoomFiltred.length + ' resourcesZoomFiltred');
+        return resourcesZoomFiltred;
+    }
 
   // TODO automatic hexZoom level
   hexbinZoom() {
