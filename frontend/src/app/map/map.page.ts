@@ -201,7 +201,7 @@ export class MapPage implements OnInit {
         }).addTo(this.map);
         resource.on({
           mouseover: (evt) => {
-            console.log('he entrado en '+hexbin);
+            // console.log('he entrado en '+hexbin);
             const resources = this.resourcesByHex[hexbin];
             if (resources) {
               resources.forEach((res) => console.log(res.title));
