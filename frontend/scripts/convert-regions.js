@@ -10,13 +10,27 @@ function writeJSON(path, data) {
 }
 
 function getHexes(geo_shape, level) {
+  var auxlev = 0;
+  if (level<8) {
+    var auxlev = level ;
+    level = 8;
+  }
+  var toReturn;
   if (geo_shape.type === 'Polygon') {
-    return h3.polyfill(geo_shape.coordinates, level, true);
+    toReturn = h3.polyfill(geo_shape.coordinates, level, true);
   } else if (geo_shape.type === 'MultiPolygon') {
-    return geo_shape.coordinates.map(
+    toReturn = geo_shape.coordinates.map(
       (polygon) => h3.polyfill(polygon, level, true)
     ).flat();
   }
+  if ( auxlev != 0 ) {
+    var upperlevel = [];
+    toReturn.forEach(hex => {
+      upperlevel.push(h3.h3ToParent(hex, auxlev))
+    })
+    toReturn = [...new Set(upperlevel)];
+  }
+  return toReturn;
 }
 
 function convertTown(rawTown, level) {

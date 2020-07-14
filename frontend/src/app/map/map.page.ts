@@ -17,7 +17,8 @@ import regions from '../../assets/data/regions.json';
 export class MapPage implements OnInit {
   map: Leaflet.Map;
   markersLayer = new Leaflet.LayerGroup();
-  hexLayer: Leaflet.LayerGroup[] = [];
+
+  hexLayer = new Leaflet.LayerGroup();
   isHexSelected: boolean = false;
   queryText = '';
   currentCategory = '';
@@ -110,7 +111,7 @@ export class MapPage implements OnInit {
     }).addTo(this.map);
 
     this.markersLayer.addTo(this.map);
-
+    this.hexLayer.addTo(this.map);
     // first render
     this.renderDemo();
 
@@ -136,7 +137,7 @@ export class MapPage implements OnInit {
     console.log('Hex search level: ' + searchLevel + '; //are ' + this.searchHexList.length + ' hexagons');
 
     // filter regions to only current level with offset
-    const listRegions = this.regionFilter(this.searchHexList, regions[searchLevel] || [] );
+    const listRegions = this.regionFilter(this.searchHexList, regions[searchLevel] || []);
 
     // regions
     const regionsToDraw = this.regionsInList(listRegions, regions[viewLevel] || []);
@@ -180,7 +181,6 @@ export class MapPage implements OnInit {
   }
 
   drawResources(resources) {
-    const level = this.getHexLevel();
     resources.forEach(resource => {
       if (resource.hex) {
         const feature = Leaflet.geoJSON(geojson2h3.h3ToFeature(resource.hex), {
@@ -191,7 +191,7 @@ export class MapPage implements OnInit {
             fillOpacity: 0.3,
             opacity: 1,
           }
-        }).addTo(this.hexLayer[level]);
+        }).addTo(this.hexLayer);
 
         // add hover effect to show data
         feature.on({
@@ -206,51 +206,43 @@ export class MapPage implements OnInit {
   }
 
   drawRegions(regions) {
-    const level = this.getHexLevel();
-    if (!this.hexLayer[level]) {
-      this.hexLayer[level] = new Leaflet.LayerGroup();
-      regions.forEach(region => {
-        if (region && region.perimeter && region.perimeter.length !== 0) {
-          if (region.type === 'province') {
-            Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
-              style: {
-                stroke: true,
-                fill: false,
-                weight: 2,
-                opacity: 1,
-                color: '#fd8d3c'
-              }
-            }).addTo(this.hexLayer[level]);
-          } else if (region.type === 'town') {
-            Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
-              style: {
-                stroke: true,
-                fill: false,
-                weight: 2,
-                opacity: 1,
-                color: '#2e51ff'
-              }
-            }).addTo(this.hexLayer[level]);
+    this.hexLayer.clearLayers();
 
-            Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(region.perimeter), {
-              style: {
-                stroke: true,
-                fill: false,
-                weight: 1,
-                opacity: 1,
-                color: '#76c0ff'
-              }
-            }).addTo(this.hexLayer[level]);
-          }
+    regions.forEach(region => {
+      if (region && region.perimeter && region.perimeter.length !== 0) {
+        if (region.type === 'province') {
+          Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
+            style: {
+              stroke: true,
+              fill: false,
+              weight: 2,
+              opacity: 1,
+              color: '#fd8d3c'
+            }
+          }).addTo(this.hexLayer);
+        } else if (region.type === 'town') {
+          Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
+            style: {
+              stroke: true,
+              fill: false,
+              weight: 2,
+              opacity: 1,
+              color: '#2e51ff'
+            }
+          }).addTo(this.hexLayer);
+
+          Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(region.perimeter), {
+            style: {
+              stroke: true,
+              fill: false,
+              weight: 1,
+              opacity: 1,
+              color: '#76c0ff'
+            }
+          }).addTo(this.hexLayer);
         }
-      });
-    }
-
-    this.hexLayer.forEach(aux => {
-      aux.removeFrom(this.map);
+      }
     });
-    this.hexLayer[level].addTo(this.map);
-
   }
 
   zoomFilter(items) {
