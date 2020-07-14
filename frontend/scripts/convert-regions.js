@@ -56,7 +56,12 @@ function convertResource(rawResource) {
 rawTowns = loadJSON(process.argv[2]).records;
 rawProvinces = loadJSON(process.argv[3]).records;
 regions = {
-  5: rawProvinces.map((province) => convertProvince(province, 5)),
+  2: rawProvinces.map((province) => convertProvince(province, 2)),
+  3: rawProvinces.map((province) => convertProvince(province, 3)),
+  4: rawTowns.map((town) => convertTown(town, 4))
+      .concat(rawProvinces.map((province) => convertProvince(province, 4))),
+  5: rawTowns.map((town) => convertTown(town, 5))
+      .concat(rawProvinces.map((province) => convertProvince(province, 5))),
   6: rawTowns.map((town) => convertTown(town, 6))
        .concat(rawProvinces.map((province) => convertProvince(province, 6))),
   7: rawTowns.map((town) => convertTown(town, 7))
