@@ -92,7 +92,7 @@ export class MapPage implements OnInit {
   }
 
   leafletMap() {
-    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 7);
+    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 10);
 
     Leaflet.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: ''
@@ -108,7 +108,7 @@ export class MapPage implements OnInit {
     this.renderDemo();
 
     // recalculate render on drag and zoom
-    this.map.on('zoomend', (e: Leaflet.LeafletMouseEvent) => {
+    this.map.on('zoomend dragend', (e: Leaflet.LeafletMouseEvent) => {
       this.renderDemo();
     });
 
@@ -119,15 +119,15 @@ export class MapPage implements OnInit {
     console.log('Hex zoom: ', this.hexbinZoom());
 
     this.viewHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom());
-    this.searchHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom() + 2);
+    this.searchHexList = this.fromBoundsToListHexagonsOfLevel(this.hexbinZoom() - 2);
 
-    const listRegions = this.boxFilter(this.searchHexList, regions[this.hexbinZoom()] || [], this.hexbinZoom() + 2 );
+    const listRegions = this.boxFilter(this.searchHexList, regions[this.hexbinZoom()-2] || [], this.hexbinZoom() - 2 );
 
     console.log('listRegions: ', listRegions);
     // regions
     //this.drawRegions(this.hexbinFilter(listRegions, regions));
     // resource hexbins
-    this.drawHexbins(this.hexbinFilter(currentHexList, resources));
+    //this.drawHexbins(this.hexbinFilter(currentHexList, resources));
   }
 
 
@@ -236,24 +236,23 @@ export class MapPage implements OnInit {
 
   boxFilter(listHex, hexbins, level) {
     const hexbinsNew = [];
-    hexbins.forEach(hexbin => {
-      if (hexbin.level == level) {
+    console.log(hexbins);
+    hexbins.forEach(hexbin => {      
         if (this.findCommonElements(hexbin.perimeter, listHex)) {
           hexbinsNew.push(hexbin.name);
-        }
-      }
+        }     
       //console.log('Painting region ' + hexbin.name);
     });
     return hexbinsNew;
   }
 
-  hexbinFilter(listHex, hexbins) {
-    const hexbinsZoomFiltred = this.zoomFilter(hexbins);
-    console.log('Current bounds contain ' + hexbinsZoomFiltred.length + ' hexbinsZoomFiltred');
-    const hexbinsBoxFiltred = this.boxFilter(listHex, hexbinsZoomFiltred);
-    console.log('Current bounds contain ' + hexbinsBoxFiltred.length + ' hexbinsBoxFiltred');
-    return hexbinsBoxFiltred;
-  }
+  // hexbinFilter(listHex, hexbins) {
+  //   const hexbinsZoomFiltred = this.zoomFilter(hexbins);
+  //   console.log('Current bounds contain ' + hexbinsZoomFiltred.length + ' hexbinsZoomFiltred');
+  //   const hexbinsBoxFiltred = this.boxFilter(listHex, hexbinsZoomFiltred);
+  //   console.log('Current bounds contain ' + hexbinsBoxFiltred.length + ' hexbinsBoxFiltred');
+  //   return hexbinsBoxFiltred;
+  // }
 
   hexbinZoom() {
     const zoom = this.map.getZoom();
