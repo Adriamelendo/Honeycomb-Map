@@ -106,7 +106,7 @@ export class MapPage implements OnInit {
   }
 
   leafletMap() {
-    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 10);
+    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 12);
 
     Leaflet.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: ''
@@ -200,7 +200,9 @@ export class MapPage implements OnInit {
           mouseover: (evt) => {
             // console.log('he entrado en '+resource);
             this.items = this.resourcesByHex[resource.hex];            
-          },
+          }, mouseout: (evt) => {
+            this.items = [];
+          }
         });
       }
     });
