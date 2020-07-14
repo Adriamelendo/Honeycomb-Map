@@ -55,24 +55,19 @@ function convertResource(rawResource) {
 
 rawTowns = loadJSON(process.argv[2]).records;
 rawProvinces = loadJSON(process.argv[3]).records;
-regions = rawTowns.map((town) => convertTown(town, 7))
-  .concat(rawTowns.map((town) => convertTown(town, 8)))
-  .concat(rawProvinces.map((prov) => convertProvince(prov, 6)))
-  .concat(rawProvinces.map((prov) => convertProvince(prov, 7)))
-  .concat(rawProvinces.map((prov) => convertProvince(prov, 8)));
-
-// regions.forEach((region) => {
-//   console.log(region.id, region.name);
-//   console.log(region.perimeter);
-// });
+regions = {
+  5: rawProvinces.map((province) => convertProvince(province, 5)),
+  6: rawTowns.map((town) => convertTown(town, 6))
+       .concat(rawProvinces.map((province) => convertProvince(province, 6))),
+  7: rawTowns.map((town) => convertTown(town, 7))
+       .concat(rawProvinces.map((province) => convertProvince(province, 7))),
+  8: rawTowns.map((town) => convertTown(town, 8))
+       .concat(rawProvinces.map((province) => convertProvince(province, 8))),
+};
 
 
 rawResources = loadJSON(process.argv[4]).results;
 resources = rawResources.map(convertResource);
-
-// resources.forEach((resource) => {
-//   console.log(resource.id, resource.title, resource.category, resource.hex, resource.regionId);
-// });
 
 writeJSON(process.argv[5], regions);
 writeJSON(process.argv[6], resources);

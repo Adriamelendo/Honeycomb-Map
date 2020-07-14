@@ -90,7 +90,7 @@ export class MapPage implements OnInit {
   }
 
   leafletMap() {
-    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 6);
+    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 7);
 
     Leaflet.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: ''
@@ -106,23 +106,23 @@ export class MapPage implements OnInit {
     this.renderDemo();
 
     // recalculate render on drag and zoom
-    this.map.on('zoomend dragend', (e: Leaflet.LeafletMouseEvent) => {
+    this.map.on('zoomend', (e: Leaflet.LeafletMouseEvent) => {
       this.renderDemo();
     });
 
   }
 
   renderDemo() {
-
+    console.log('Map zoom: ', this.map.getZoom());
+    console.log('Hex zoom: ', this.hexbinZoom());
 
     const currentHexList = this.fromBoundsToListHexagonsOfLevel();
 
-
     // regions
-    this.drawRegions(this.hexbinFilter(currentHexList, regions));
+    this.drawRegions(regions[this.hexbinZoom()] || []);
 
     // resource hexbins
-    //this.drawHexbins(this.hexbinFilter(currentHexList, resources));
+    this.drawHexbins(this.hexbinFilter(currentHexList, resources));
   }
 
   private findCommonElements(arr1, arr2) {
@@ -160,6 +160,7 @@ export class MapPage implements OnInit {
           style: {
             stroke: false,
             fill: true,
+            fillColor: '#756bb1',
             fillOpacity: 0.6,
             opacity: 1,
           }
@@ -233,7 +234,7 @@ export class MapPage implements OnInit {
       // if (this.findCommonElements(hexbin.perimeter, listHex)) {
       hexbinsNew.push(hexbin);
       // }
-      console.log('Painting region ' + hexbin.name);
+      /* console.log('Painting region ' + hexbin.name); */
     });
     return hexbinsNew;
   }
@@ -252,8 +253,8 @@ export class MapPage implements OnInit {
     switch (zoom) {
       case 6: {
         //level = 3; //are 196 hexagons
-        //level = 4; //are 1359 hexagons
-        level = 5; //are 9528 hexagons
+        level = 4; //are 1359 hexagons
+        //level = 5; //are 9528 hexagons
         //level = 6; //are 66686 hexagons
         //level = 7; //are 466779 hexagons
         //level = 8; //are 3267389 hexagons 
@@ -268,16 +269,16 @@ export class MapPage implements OnInit {
         break;
       }
       case 8: {
-        //level = 5; //are 626 hexagons
-        level = 6; //are 4372 hexagons
+        level = 5; //are 626 hexagons
+        //level = 6; //are 4372 hexagons
         //level = 7; //are 30601 hexagons
         //level = 8; //are 214196 hexagons 
         break;
       }
       case 9: {
         //level = 5; //are 162 hexagons
-        //level = 6; //are 1144 hexagons
-        level = 7; //are 8018 hexagons
+        level = 6; //are 1144 hexagons
+        //level = 7; //are 8018 hexagons
         //level = 8; //are 56124 hexagons
         //level = 9; //are 392833 hexagons 
         break;
@@ -291,8 +292,8 @@ export class MapPage implements OnInit {
       }
       case 11: {
         //level = 6; //are 92 hexagons
-        //level = 7; //are 653 hexagons
-        level = 8; //are 4571 hexagons
+        level = 7; //are 653 hexagons
+        //level = 8; //are 4571 hexagons
         //level = 9; //are 32003 hexagons 
         break;
       }
