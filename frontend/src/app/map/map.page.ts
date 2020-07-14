@@ -255,83 +255,74 @@ export class MapPage implements OnInit {
   boxFilter(listHex, hexbins): string[] {
     const hexbinsNew = [];
     console.log(hexbins);
-    hexbins.forEach(hexbin => {      
+    hexbins.forEach(hexbin => {
         if (this.findCommonElements(hexbin.perimeter, listHex)) {
           hexbinsNew.push(hexbin.name);
-        }     
-      //console.log('Painting region ' + hexbin.name);
+        }
     });
     return hexbinsNew;
   }
-
-  // hexbinFilter(listHex, hexbins) {
-  //   const hexbinsZoomFiltred = this.zoomFilter(hexbins);
-  //   console.log('Current bounds contain ' + hexbinsZoomFiltred.length + ' hexbinsZoomFiltred');
-  //   const hexbinsBoxFiltred = this.boxFilter(listHex, hexbinsZoomFiltred);
-  //   console.log('Current bounds contain ' + hexbinsBoxFiltred.length + ' hexbinsBoxFiltred');
-  //   return hexbinsBoxFiltred;
-  // }
 
   hexbinZoom() {
     const zoom = this.map.getZoom();
     let level = 0;
     switch (zoom) {
       case 6: {
-        //level = 3; //are 196 hexagons
-        level = 4; //are 1359 hexagons
-        //level = 5; //are 9528 hexagons
-        //level = 6; //are 66686 hexagons
-        //level = 7; //are 466779 hexagons
-        //level = 8; //are 3267389 hexagons 
+        // level = 3; // are 196 hexagons
+        level = 4; // are 1359 hexagons
+        // level = 5; // are 9528 hexagons
+        // level = 6; // are 66686 hexagons
+        // level = 7; // are 466779 hexagons
+        // level = 8; // are 3267389 hexagons
         break;
       }
       case 7: {
-        //level = 4; //are 347 hexagons
-        level = 5; //are 2446 hexagons
-        //level = 6; //are 17117 hexagons
-        //level = 7; //are 119743 hexagons
-        //level = 8; //are 838212 hexagons
+        // level = 4; // are 347 hexagons
+        level = 5; // are 2446 hexagons
+        // level = 6; // are 17117 hexagons
+        // level = 7; // are 119743 hexagons
+        // level = 8; // are 838212 hexagons
         break;
       }
       case 8: {
-        level = 5; //are 626 hexagons
-        //level = 6; //are 4372 hexagons
-        //level = 7; //are 30601 hexagons
-        //level = 8; //are 214196 hexagons 
+        level = 5; // are 626 hexagons
+        // level = 6; // are 4372 hexagons
+        // level = 7; // are 30601 hexagons
+        // level = 8; // are 214196 hexagons
         break;
       }
       case 9: {
-        //level = 5; //are 162 hexagons
-        level = 6; //are 1144 hexagons
-        //level = 7; //are 8018 hexagons
-        //level = 8; //are 56124 hexagons
-        //level = 9; //are 392833 hexagons 
+        // level = 5; // are 162 hexagons
+        level = 6; // are 1144 hexagons
+        // level = 7; // are 8018 hexagons
+        // level = 8; // are 56124 hexagons
+        // level = 9; // are 392833 hexagons
         break;
       }
       case 10: {
-        //level = 6; //are 267 hexagons
-        level = 7; //are 1874 hexagons
-        //level = 8; //are 13093 hexagons
-        //level = 9; //are 91651 hexagons 
+        // level = 6; // are 267 hexagons
+        level = 7; // are 1874 hexagons
+        // level = 8; // are 13093 hexagons
+        // level = 9; // are 91651 hexagons
         break;
       }
       case 11: {
-        //level = 6; //are 92 hexagons
-        level = 7; //are 653 hexagons
-        //level = 8; //are 4571 hexagons
-        //level = 9; //are 32003 hexagons 
+        // level = 6; // are 92 hexagons
+        level = 7; // are 653 hexagons
+        // level = 8; // are 4571 hexagons
+        // level = 9; // are 32003 hexagons
         break;
       }
       case 12: {
-        //level = 7; //are 220 hexagons
-        level = 8; //are 1552 hexagons
-        //level = 9; //are 10868 hexagons
+        // level = 7; // are 220 hexagons
+        level = 8; // are 1552 hexagons
+        // level = 9; // are 10868 hexagons
         break;
       }
       case 13: {
-        //level = 7; //are 90 hexagons
-        //level = 8; //are 638 hexagons
-        level = 9; //are 4471 hexagons
+        // level = 7; // are 90 hexagons
+        // level = 8; // are 638 hexagons
+        level = 9; // are 4471 hexagons
         break;
       }
       default: {
@@ -343,7 +334,7 @@ export class MapPage implements OnInit {
         break;
       }
     }
-    return level; //zoom * this.hexbinZoomBase;
+    return level; // zoom * this.hexbinZoomBase;
   }
 
 }
