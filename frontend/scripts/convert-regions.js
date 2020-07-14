@@ -9,6 +9,16 @@ function writeJSON(path, data) {
   fs.writeFileSync(path, JSON.stringify(data, null, 4));
 }
 
+function getHexes(geo_shape, level) {
+  if (geo_shape.type === 'Polygon') {
+    return h3.polyfill(geo_shape.coordinates, level, true);
+  } else if (geo_shape.type === 'MultiPolygon') {
+    return geo_shape.coordinates.map(
+      (polygon) => h3.polyfill(polygon, level, true)
+    ).flat();
+  }
+}
+
 function convertTown(rawTown, level) {
   return {
     id: rawTown.recordid,
@@ -17,7 +27,7 @@ function convertTown(rawTown, level) {
     // province: rawTown.fields.provincia,
     // state: rawTown.fields.communidad_autonoma,
     level: level,
-    perimeter: h3.polyfill(rawTown.fields.geo_shape.coordinates, level, true),
+    perimeter: getHexes(rawTown.fields.geo_shape, level),
   };
 }
 
@@ -27,7 +37,7 @@ function convertProvince(rawProvince, level) {
     name: rawProvince.fields.nameunit,
     type: 'province',
     level: level,
-    perimeter: h3.polyfill(rawProvince.fields.geo_shape.coordinates, level, true),
+    perimeter: getHexes(rawProvince.fields.geo_shape, level),
   };
 }
 

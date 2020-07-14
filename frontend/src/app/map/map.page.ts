@@ -153,7 +153,7 @@ export class MapPage implements OnInit {
   drawHexbins(hexbins) {
     hexbins.forEach(hexbin => {
       if (hexbin.hex) {
-        Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.hex), {
+        Leaflet.geoJSON(geojson2h3.h3ToFeature(hexbin.hex), {
           style: {
             stroke: false,
             fill: true,
@@ -168,25 +168,37 @@ export class MapPage implements OnInit {
   drawRegions(hexbins) {
     hexbins.forEach(hexbin => {
       if (hexbin.perimeter.length !== 0) {
-        Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.perimeter), {
-          style: {
-            stroke: true,
-            fill: false,
-            weight: 2,
-            opacity: 1,
-            color: '#2e51ff'
-          }
-        }).addTo(this.map);
+        if (hexbin.type === 'province') {
+          Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.perimeter), {
+            style: {
+              stroke: true,
+              fill: false,
+              weight: 2,
+              opacity: 1,
+              color: '#fd8d3c'
+            }
+          }).addTo(this.map);
+        } else if (hexbin.type === 'town') {
+          Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.perimeter), {
+            style: {
+              stroke: true,
+              fill: false,
+              weight: 2,
+              opacity: 1,
+              color: '#2e51ff'
+            }
+          }).addTo(this.map);
 
-        Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(hexbin.perimeter), {
-          style: {
-            stroke: true,
-            fill: false,
-            weight: 1,
-            opacity: 1,
-            color: '#76c0ff'
-          }
-        }).addTo(this.map);
+          Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(hexbin.perimeter), {
+            style: {
+              stroke: true,
+              fill: false,
+              weight: 1,
+              opacity: 1,
+              color: '#76c0ff'
+            }
+          }).addTo(this.map);
+        }
       }
     });
   }
