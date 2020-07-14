@@ -148,7 +148,6 @@ export class MapPage implements OnInit {
     this.drawResources(this.zoomFilter(resources));
   }
 
-  // TODO reduce duplicates
   regionsInList(listNames: string[], regions: any[]) {
     return regions.filter(
       (region) => (listNames.indexOf(region.name) !== -1)
