@@ -125,7 +125,7 @@ export class MapPage implements OnInit {
 
     console.log('listRegions: ', listRegions);
     // regions
-    const regionsToDraw=this.regionsInList(listRegions, regions[this.hexbinZoom()]);
+    const regionsToDraw=this.regionsInList(listRegions, regions[this.hexbinZoom()] || []);
     console.log('regionsToDraw: ', regionsToDraw);
     this.drawRegions(regionsToDraw);
     // resource hexbins
