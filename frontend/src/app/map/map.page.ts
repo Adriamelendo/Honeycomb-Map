@@ -150,7 +150,8 @@ export class MapPage implements OnInit {
     this.drawResources(this.resourceFilter(this.viewHexList, resources));
   }
 
-  regionsInList(listNames:string[], regions: any[]) {
+  // TODO reduce duplicates
+  regionsInList(listNames: string[], regions: any[]) {
     return regions.filter(
       (region) => (listNames.indexOf(region.name) !== -1)
     );
@@ -168,10 +169,10 @@ export class MapPage implements OnInit {
   }
 
   // TODO rename function
-  fromBoundsToListHexagonsOfLevel(lev: number) {
+  fromBoundsToListHexagonsOfLevel(level: number) {
     const bounds = this.map.getBounds();
 
-    const meters = h3.edgeLength(lev, 'm');
+    const meters = h3.edgeLength(level, 'm');
     // aprox 1km in degree = 1 / 111.32km = 0.0089
     // 1m in degree = 0.0089 / 1000 = 0.0000089
     // pi / 180 = 0.018
@@ -180,14 +181,15 @@ export class MapPage implements OnInit {
     const northEast = this.addMargin(bounds.getNorth(), bounds.getEast(), coef);
     const southWest = this.addMargin(bounds.getSouth(), bounds.getWest(), -coef);
 
-    const listHex = h3.polyfill([northEast, [northEast[0], southWest[1]], southWest, [southWest[0], northEast[1]]], lev);
+    const listHex = h3.polyfill([northEast, [northEast[0], southWest[1]], southWest, [southWest[0], northEast[1]]], level);
 
-    console.log('level = ' + lev + '; //are ' + listHex.length + ' hexagons');
+    console.log('level = ' + level + '; //are ' + listHex.length + ' hexagons');
     return listHex;
   }
 
+  // TODO add LayerGroup
   drawResources(resources) {
-    const lev = this.hexbinZoom();
+    const level = this.hexbinZoom();
     resources.forEach(resource => {
       if (resource.hex) {
         const feature = Leaflet.geoJSON(geojson2h3.h3ToFeature(resource.hex), {
@@ -198,7 +200,7 @@ export class MapPage implements OnInit {
             fillOpacity: 0.3,
             opacity: 1,
           }
-        }).addTo(this.hexLayer[lev]);
+        }).addTo(this.hexLayer[level]);
         feature.on({
           mouseover: (evt) => {
             // console.log('he entrado en '+resource);
@@ -213,9 +215,9 @@ export class MapPage implements OnInit {
   }
 
   drawRegions(regions) {
-    const lev = this.hexbinZoom();
-    if (!this.hexLayer[lev]) {
-      this.hexLayer[lev] = new Leaflet.LayerGroup();
+    const level = this.hexbinZoom();
+    if (!this.hexLayer[level]) {
+      this.hexLayer[level] = new Leaflet.LayerGroup();
       regions.forEach(region => {
         if (region && region.perimeter && region.perimeter.length !== 0) {
           if (region.type === 'province') {
@@ -227,7 +229,7 @@ export class MapPage implements OnInit {
                 opacity: 1,
                 color: '#fd8d3c'
               }
-            }).addTo(this.hexLayer[lev]);
+            }).addTo(this.hexLayer[level]);
           } else if (region.type === 'town') {
             Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
               style: {
@@ -237,7 +239,7 @@ export class MapPage implements OnInit {
                 opacity: 1,
                 color: '#2e51ff'
               }
-            }).addTo(this.hexLayer[lev]);
+            }).addTo(this.hexLayer[level]);
 
             Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(region.perimeter), {
               style: {
@@ -247,7 +249,7 @@ export class MapPage implements OnInit {
                 opacity: 1,
                 color: '#76c0ff'
               }
-            }).addTo(this.hexLayer[lev]);
+            }).addTo(this.hexLayer[level]);
           }
         }
       });
@@ -256,28 +258,28 @@ export class MapPage implements OnInit {
     this.hexLayer.forEach(aux => {
       aux.removeFrom(this.map);
     });
-    this.hexLayer[lev].addTo(this.map);
+    this.hexLayer[level].addTo(this.map);
 
   }
 
-    zoomFilter(hexbins) {
-        const zoom = this.hexbinZoom();
-        return hexbins.filter((hexbin) => hexbin.level === zoom);
-    }
+  zoomFilter(items) {
+    const zoom = this.hexbinZoom();
+    return items.filter((item) => item.level === zoom);
+  }
 
-    regionFilter(listHex, regions): string[] {
-        return regions.filter(
-            (region) => this.findCommonElements(region.perimeter, listHex)
-        ).map(
-            (region) => region.name
-        );
-    }
+  regionFilter(listHex, regions): string[] {
+    return regions.filter(
+      (region) => this.findCommonElements(region.perimeter, listHex)
+    ).map(
+      (region) => region.name
+    );
+  }
 
-    resourceFilter(listHex, resources) {
-        const resourcesZoomFiltred = this.zoomFilter(resources);
-        console.log('Current zoom contain ' + resourcesZoomFiltred.length + ' resourcesZoomFiltred');
-        return resourcesZoomFiltred;
-    }
+  resourceFilter(listHex, resources) {
+    const resourcesZoomFiltred = this.zoomFilter(resources);
+    console.log('Current zoom contain ' + resourcesZoomFiltred.length + ' resourcesZoomFiltred');
+    return resourcesZoomFiltred;
+  }
 
   // TODO automatic hexZoom level
   hexbinZoom() {
