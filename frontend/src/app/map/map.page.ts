@@ -17,6 +17,7 @@ import regions from '../../assets/data/regions.json';
 export class MapPage implements OnInit {
   map: Leaflet.Map;
   markersLayer = new Leaflet.LayerGroup();
+  hexLayer: Leaflet.LayerGroup[] = [];
   isHexSelected: boolean = false;
   queryText = '';
   currentCategory = '';
@@ -112,14 +113,16 @@ export class MapPage implements OnInit {
   }
 
   renderDemo() {
+
+
     const currentHexList = this.fromBoundsToListHexagonsOfLevel();
-    
+
 
     // regions
     this.drawRegions(this.hexbinFilter(currentHexList, regions));
 
     // resource hexbins
-    this.drawHexbins(this.hexbinFilter(currentHexList, resources));
+    //this.drawHexbins(this.hexbinFilter(currentHexList, resources));
   }
 
   private findCommonElements(arr1, arr2) {
@@ -132,7 +135,7 @@ export class MapPage implements OnInit {
     return [new_lat, new_lng];
   }
 
-  fromBoundsToListHexagonsOfLevel(lev: number = this.hexbinZoom() ) {
+  fromBoundsToListHexagonsOfLevel(lev: number = this.hexbinZoom()) {
     const bounds = this.map.getBounds();
 
     const meters = h3.edgeLength(lev, 'm');
@@ -166,41 +169,51 @@ export class MapPage implements OnInit {
   }
 
   drawRegions(hexbins) {
-    hexbins.forEach(hexbin => {
-      if (hexbin.perimeter.length !== 0) {
-        if (hexbin.type === 'province') {
-          Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.perimeter), {
-            style: {
-              stroke: true,
-              fill: false,
-              weight: 2,
-              opacity: 1,
-              color: '#fd8d3c'
-            }
-          }).addTo(this.map);
-        } else if (hexbin.type === 'town') {
-          Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.perimeter), {
-            style: {
-              stroke: true,
-              fill: false,
-              weight: 2,
-              opacity: 1,
-              color: '#2e51ff'
-            }
-          }).addTo(this.map);
+    const lev = this.hexbinZoom();
+    if (!this.hexLayer[lev]) {
+      this.hexLayer[lev] = new Leaflet.LayerGroup();
+      hexbins.forEach(hexbin => {
+        if (hexbin.perimeter.length !== 0) {
+          if (hexbin.type === 'province') {
+            Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.perimeter), {
+              style: {
+                stroke: true,
+                fill: false,
+                weight: 2,
+                opacity: 1,
+                color: '#fd8d3c'
+              }
+            }).addTo(this.hexLayer[lev]);
+          } else if (hexbin.type === 'town') {
+            Leaflet.geoJSON(geojson2h3.h3SetToFeature(hexbin.perimeter), {
+              style: {
+                stroke: true,
+                fill: false,
+                weight: 2,
+                opacity: 1,
+                color: '#2e51ff'
+              }
+            }).addTo(this.hexLayer[lev]);
 
-          Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(hexbin.perimeter), {
-            style: {
-              stroke: true,
-              fill: false,
-              weight: 1,
-              opacity: 1,
-              color: '#76c0ff'
-            }
-          }).addTo(this.map);
+            Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(hexbin.perimeter), {
+              style: {
+                stroke: true,
+                fill: false,
+                weight: 1,
+                opacity: 1,
+                color: '#76c0ff'
+              }
+            }).addTo(this.hexLayer[lev]);
+          }
         }
-      }
+      });
+    }
+
+    this.hexLayer.forEach(aux => {
+      aux.removeFrom(this.map);
     });
+    this.hexLayer[lev].addTo(this.map);
+
   }
 
   zoomFilter(hexbins) {
@@ -296,10 +309,10 @@ export class MapPage implements OnInit {
         break;
       }
       default: {
-        if (zoom>19){
-          level=9;
+        if (zoom > 19) {
+          level = 9;
         } else {
-          level=3;
+          level = 3;
         }
         break;
       }
