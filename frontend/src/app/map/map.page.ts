@@ -28,6 +28,8 @@ export class MapPage implements OnInit {
   viewHexList = [];
   searchHexList = [];
 
+  resourcesByHex: Map<string, object>;
+
   bigLatLng: Leaflet.LatLng;
   bigZoom: number;
 
@@ -57,6 +59,18 @@ export class MapPage implements OnInit {
     //   this.updateMarkers();
     // }));
     // this.data.queryAllItems();
+
+    this.resourcesByHex = resources.reduce(
+      (map, resource) => {
+        if (!map[resource.hex]) {
+          map[resource.hex] = [];
+        }
+        map[resource.hex].push(resource);
+        return map;
+      },
+      new Map<string, object>()
+    );
+    //console.log(this.resourcesByHex);
   }
 
   updateMarkers() {
@@ -174,7 +188,7 @@ export class MapPage implements OnInit {
   drawHexbins(hexbins) {
     hexbins.forEach(hexbin => {
       if (hexbin.hex) {
-        Leaflet.geoJSON(geojson2h3.h3ToFeature(hexbin.hex), {
+        const resource = Leaflet.geoJSON(geojson2h3.h3ToFeature(hexbin.hex), {
           style: {
             stroke: false,
             fill: true,
@@ -183,6 +197,14 @@ export class MapPage implements OnInit {
             opacity: 1,
           }
         }).addTo(this.map);
+        resource.on({
+          mouseover: (evt) => {
+            const resources = this.resourcesByHex[hexbin.hex];
+            if (resources) {
+              resources.forEach((res) => console.log(res.title));
+            }
+          },
+        });
       }
     });
   }
