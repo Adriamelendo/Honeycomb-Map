@@ -9,20 +9,15 @@ function writeJSON(path, data) {
   fs.writeFileSync(path, JSON.stringify(data, null, 4));
 }
 
-function getHexes(geo_shape, level) {
+function searchHexes(id,geo_shape, level) {
   var auxlev = 0;
   if (level<8) {
     var auxlev = level ;
     level = 8;
   }
   var toReturn;
-  if (geo_shape.type === 'Polygon') {
-    toReturn = h3.polyfill(geo_shape.coordinates, level, true);
-  } else if (geo_shape.type === 'MultiPolygon') {
-    toReturn = geo_shape.coordinates.map(
-      (polygon) => h3.polyfill(polygon, level, true)
-    ).flat();
-  }
+  toReturn = level8Reference[id] || [];  
+  if (toReturn == [] ) print('caution region '+id+' no hex in level 8');
   if ( auxlev != 0 ) {
     var upperlevel = [];
     toReturn.forEach(hex => {
@@ -33,6 +28,17 @@ function getHexes(geo_shape, level) {
   return toReturn;
 }
 
+function viewHexes(id,geo_shape, level) { 
+  if(level==8) return level8Reference[id];
+  if (geo_shape.type === 'Polygon') {
+    return h3.polyfill(geo_shape.coordinates, level, true);
+  } else if (geo_shape.type === 'MultiPolygon') {
+    return geo_shape.coordinates.map(
+      (polygon) => h3.polyfill(polygon, level, true)
+    ).flat();
+  }  
+}
+
 function convertTown(rawTown, level) {
   return {
     id: rawTown.recordid,
@@ -41,7 +47,8 @@ function convertTown(rawTown, level) {
     // province: rawTown.fields.provincia,
     // state: rawTown.fields.communidad_autonoma,
     level: level,
-    perimeter: getHexes(rawTown.fields.geo_shape, level),
+    view: viewHexes(rawTown.recordid,rawTown.fields.geo_shape, level),
+    search: searchHexes(rawTown.recordid,rawTown.fields.geo_shape, level),
   };
 }
 
@@ -51,7 +58,8 @@ function convertProvince(rawProvince, level) {
     name: rawProvince.fields.nameunit,
     type: 'province',
     level: level,
-    perimeter: getHexes(rawProvince.fields.geo_shape, level),
+    view: viewHexes(rawProvince.recordid,rawProvince.fields.geo_shape, level),
+    search: searchHexes(rawProvince.recordid,rawProvince.fields.geo_shape, level),
   };
 }
 
@@ -69,19 +77,23 @@ function convertResource(rawResource) {
 
 rawTowns = loadJSON(process.argv[2]).records;
 rawProvinces = loadJSON(process.argv[3]).records;
-regions = {
-  2: rawProvinces.map((province) => convertProvince(province, 2)),
-  3: rawProvinces.map((province) => convertProvince(province, 3)),
-  4: rawTowns.map((town) => convertTown(town, 4))
-      .concat(rawProvinces.map((province) => convertProvince(province, 4))),
-  5: rawTowns.map((town) => convertTown(town, 5))
-      .concat(rawProvinces.map((province) => convertProvince(province, 5))),
-  6: rawTowns.map((town) => convertTown(town, 6))
-       .concat(rawProvinces.map((province) => convertProvince(province, 6))),
-  7: rawTowns.map((town) => convertTown(town, 7))
-       .concat(rawProvinces.map((province) => convertProvince(province, 7))),
+var level8Reference = [];
+rawTowns.map((town) => level8Reference[town.id]=viewHexes(town.fields.geo_shape, 8));
+rawProvinces.map((province) => level8Reference[province.id]=viewHexes(province.fields.geo_shape, 8));
+
+regions = {  
   8: rawTowns.map((town) => convertTown(town, 8))
        .concat(rawProvinces.map((province) => convertProvince(province, 8))),
+  7: rawTowns.map((town) => convertTown(town, 7))
+       .concat(rawProvinces.map((province) => convertProvince(province, 7))),
+  6: rawTowns.map((town) => convertTown(town, 6))
+       .concat(rawProvinces.map((province) => convertProvince(province, 6))),
+  5: rawTowns.map((town) => convertTown(town, 5))
+       .concat(rawProvinces.map((province) => convertProvince(province, 5))),
+  4: rawTowns.map((town) => convertTown(town, 4))
+      .concat(rawProvinces.map((province) => convertProvince(province, 4))),
+  3: rawProvinces.map((province) => convertProvince(province, 3)),
+  2: rawProvinces.map((province) => convertProvince(province, 2)),
 };
 
 

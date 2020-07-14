@@ -209,9 +209,9 @@ export class MapPage implements OnInit {
     this.hexLayer.clearLayers();
 
     regions.forEach(region => {
-      if (region && region.perimeter && region.perimeter.length !== 0) {
+      if (region && region.view && region.view.length !== 0) {
         if (region.type === 'province') {
-          Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
+          Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.view), {
             style: {
               stroke: true,
               fill: false,
@@ -221,7 +221,7 @@ export class MapPage implements OnInit {
             }
           }).addTo(this.hexLayer);
         } else if (region.type === 'town') {
-          Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.perimeter), {
+          Leaflet.geoJSON(geojson2h3.h3SetToFeature(region.view), {
             style: {
               stroke: true,
               fill: false,
@@ -231,7 +231,7 @@ export class MapPage implements OnInit {
             }
           }).addTo(this.hexLayer);
 
-          Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(region.perimeter), {
+          Leaflet.geoJSON(geojson2h3.h3SetToMultiPolygonFeature(region.view), {
             style: {
               stroke: true,
               fill: false,
@@ -252,7 +252,7 @@ export class MapPage implements OnInit {
 
   regionFilter(listHex, regions): string[] {
     return regions.filter(
-      (region) => this.findCommonElements(region.perimeter, listHex)
+      (region) => this.findCommonElements(region.search, listHex)
     ).map(
       (region) => region.name
     );
