@@ -9,6 +9,7 @@ import {
 import { Item } from '../interfaces/item';
 
 import * as Leaflet from 'leaflet';
+import * as h3 from 'h3-js';
 
 @Component({
   selector: 'app-map',
@@ -20,7 +21,7 @@ export class MapPage {
 
   private hexLayer = new Leaflet.LayerGroup();
   private isHexSelected: boolean = false;
-  private isHexLocked: boolean = false;
+  private HexLocked: string;
   private queryText = '';
   private currentCategory = '';
   private hexContents: HexContents;
@@ -47,10 +48,20 @@ export class MapPage {
   toggleSelectHexagon() {
     this.isHexSelected = !this.isHexSelected;
     if (this.isHexSelected) {
-      this.appMapClass = 'hide-header';
+      this.hideSelectHexagon();
     } else {
-      this.appMapClass = 'show-header';
+      this.showSelectHexagon();
     }
+  }
+
+  showSelectHexagon() {
+    this.isHexSelected = true;
+    this.appMapClass = 'show-header';
+  }
+
+  hideSelectHexagon() {
+    this.isHexSelected = false;
+    this.appMapClass = 'hide-header';
   }
 
   ionViewDidEnter() {
@@ -96,37 +107,52 @@ export class MapPage {
         }
       }).addTo(this.hexLayer);
 
-      // add hover and click events to show data
+      // add click events to show data
       feature.on({
         click: (evt) => {
-          this.isHexLocked = !this.isHexLocked;
-        }, mouseover: (evt) => {
-          this.hexContents = this.data.getContentsAtHex(resource.hex);
-          if (!this.isHexLocked) {
-            this.toggleSelectHexagon();
-          }
-        }, mouseout: (evt) => {
-          if (!this.isHexLocked) {
-            this.hexContents = undefined;
-            this.toggleSelectHexagon();
-          }
+          this.clickEvent(resource.hex);
         }
       });
     });
   }
 
+  clickEvent(hex){
+    this.hexContents = this.data.getContentsAtHex(hex);
+
+    if (this.HexLocked !== hex) {
+      this.HexLocked = hex;
+      this.showSelectHexagon();
+    }
+    else{
+      this.hexContents = undefined;
+      this.HexLocked = '';
+      this.hideSelectHexagon();
+    }
+  }
+
   drawRegions(regions: HCMapRegion[]) {
     regions.forEach(region => {
       if (region.type === 'province') {
-        Leaflet.geoJSON(region.boundary, {
+        const feature = Leaflet.geoJSON(region.boundary, {
           style: {
             stroke: true,
-            fill: false,
+            fill: true,
             weight: 2,
+            fillOpacity: 0,
             opacity: 1,
             color: '#fd8d3c'
           }
         }).addTo(this.hexLayer);
+
+        // add click events to show data
+        feature.on({
+          click: (evt) => {
+            const level = this.data.getHexLevel(this.map.getZoom());
+            const hex = h3.geoToH3(evt.latlng.lat, evt.latlng.lng, level);
+            this.clickEvent(hex);
+          }
+        });
+
       } else if (region.type === 'town') {
         Leaflet.geoJSON(region.boundary, {
           style: {
