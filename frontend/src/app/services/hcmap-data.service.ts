@@ -203,7 +203,7 @@ export class HCMapDataService {
   }
 
   /* Calculate the hex level that corresponds to a map zoom level */
-  private getHexLevel(zoom: number) {
+  public getHexLevel(zoom: number) {
     let hexLevel = 0;
     switch (zoom) {
       case 6: {
