@@ -1,13 +1,20 @@
 :host {
     overflow-y: auto;
+    height:100%
 }
-ion-card {
-  overflow-y: auto;
+h5 {
+  margin-top: 0px;
+  margin-bottom: 0px;
+  background-color: #eeeeee;
+  border-radius: 4px;
+  padding: 1px 8px;
+  font-weight: 600;
+  color: #756bb1;
 }
 @media (min-width: 680px) {  
     .vertical-scroll{
       overflow-y: auto;
-      height: 300px;
+      height: 100%;
     }
   
     .vertical-scroll::-webkit-scrollbar {

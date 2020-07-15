@@ -1,8 +1,5 @@
-<div *ngIf="region.resources.length > 0">
-  <h1>{{ regionTitle() }}</h1>
-  <h2>{{ region.name }}</h2>
-  <div class="vertical-scroll">
-    <app-resource-item *ngFor="let resource of region.resources" [resource]="resource">
-    </app-resource-item>
-  </div>
+<h5 [class]=region.type>{{ regionTitle() }}<br>{{ region.name }}</h5>
+<div class="vertical-scroll">
+  <app-resource-item *ngFor="let resource of region.resources" [resource]="resource">
+  </app-resource-item>
 </div>

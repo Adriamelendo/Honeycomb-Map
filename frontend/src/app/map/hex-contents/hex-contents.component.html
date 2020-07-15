@@ -1,22 +1,23 @@
 <div *ngIf="showNoResult" 
 [ngClass]="{'right-panel': true, 'second-upper-pannel':true}">
   <p>No hay resultados</p>
+  <p>Clicka sobre un hexagono para ver los recursos!!</p>
 </div>
 
 <div *ngIf="hexContents && hexContents.resources.length!==0" 
-[ngClass]="{'right-panel': true, 'first-panel':true}">
+[ngClass]="{'right-panel': true, 'first-panel':layout1, 'second-upper-pannel': layout2|| layout3,'unique-panel': layout4}">
   <app-resources-card [resources]="hexContents.resources">
   </app-resources-card>
 </div>
 
 <div *ngIf="this.towns.length!==0" 
-[ngClass]="{'right-panel': true, 'second-upper-pannel': true}">
+[ngClass]="{'right-panel': true, 'second-upper-pannel':layout1||layout2, 'second-lower-pannel': layout3, 'unique-panel': layout4}">
   <app-region-card *ngFor="let town of towns" [region]="town">
   </app-region-card>
 </div>
 
 <div *ngIf="this.provinces.length!==0" 
-[ngClass]="{'right-panel': true, 'second-lower-pannel':true}">
+[ngClass]="{'right-panel': true, 'second-lower-pannel':layout1|| layout2|| layout3, 'unique-panel': layout4}">
   <app-region-card *ngFor="let province of provinces" [region]="province">
   </app-region-card>
 </div>
