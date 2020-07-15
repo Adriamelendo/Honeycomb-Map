@@ -1,19 +1,19 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { ItemsListComponent } from './items-list.component';
+import { HexContentsComponent } from './hex-contents.component';
 
-describe('ItemsListComponent', () => {
-  let component: ItemsListComponent;
-  let fixture: ComponentFixture<ItemsListComponent>;
+describe('HexContentsComponent', () => {
+  let component: HexContentsComponent;
+  let fixture: ComponentFixture<HexContentsComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ ItemsListComponent ],
+      declarations: [ HexContentsComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ItemsListComponent);
+    fixture = TestBed.createComponent(HexContentsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

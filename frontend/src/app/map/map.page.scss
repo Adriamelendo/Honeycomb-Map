@@ -1,3 +1,26 @@
 :host {
-    transition: transform 0.7s;    
+  transition: transform 0.7s;
 }
+
+:host.show-header {  
+  transform: translateY(0);
+  height:150vh;
+}
+
+:host.hide-header {  
+  transform: translateY(-50vh);  
+  height:150vh;
+}
+
+@media (min-width: 680px){
+  :host.show-header {  
+    transform: translateY(0);
+    height:100vh;
+  }
+
+  :host.hide-header {  
+    transform: translateY(0);
+    height:100vh;
+  }
+}
+

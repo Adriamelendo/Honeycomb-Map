@@ -13,6 +13,7 @@ export interface HCMapRegion {
   type: 'province' | 'town';
   boundary: geojson2h3.GeoJsonObject;  // GeoJSON shape of the region borders at the given hexLevel
   inside: geojson2h3.GeoJsonObject;    // GeoJSON shape of the inside hexes at the given hexLevel
+  resources: HCMapResource[];
 }
 
 export interface HCMapResource {
@@ -24,30 +25,22 @@ export interface HCMapResource {
   outline: geojson2h3.GeoJsonObject;   // GeoJSON shape of the containing hex at the given hexLevel
 }
 
+export type MapData = [HCMapRegion[], HCMapResource[]];
+
+export interface HexContents {
+  regions: HCMapRegion[];
+  resources: HCMapResource[];
+}
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class HCMapDataService {
 
-  public mapData: Observable<[HCMapRegion[], HCMapResource[]]>;
+  public mapData: Observable<MapData> = new Subject<MapData>();
 
-  private resourcesByHex: Map<string, object>;
-
-  constructor() {
-    this.resourcesByHex = resources.reduce(
-      (map, resource) => {
-        if (!map[resource.hex]) {
-          map[resource.hex] = [];
-        }
-        map[resource.hex].push(resource);
-        return map;
-      },
-      new Map<string, object>()
-    );
-
-    this.mapData = new Subject();
-  }
+  private contentsByHex: Map<string, HexContents>;
 
   /* Recalculate all mapData in the new viewport */
   public setViewport(bounds: L.LatLngBounds, zoom: number) {
@@ -57,15 +50,17 @@ export class HCMapDataService {
     console.log('Map zoom:', zoom);
     console.log('Hex level:', hexLevel);
 
+    this.contentsByHex = new Map<string, HexContents>();
+
     const regions = this.getRegions(extBounds, hexLevel);
     const resources = this.getResources(extBounds, hexLevel);
 
-    (this.mapData as Subject<[HCMapRegion[], HCMapResource[]]>).next([regions, resources]);
+    (this.mapData as Subject<MapData>).next([regions, resources]);
   }
 
-  /* Get all resources in a given hex */
-  public getResourcesInHex(hex: string) {
-    return this.resourcesByHex[hex];
+  /* Get all contents at a given hex */
+  public getContentsAtHex(hex: string) {
+    return this.contentsByHex[hex];
   }
 
   /* Enlarge bounds to fit one hexagon more at each border, at the given hexLevel */
@@ -113,7 +108,8 @@ export class HCMapDataService {
         if (!viewRegion) {
           return undefined;
         }
-        return {
+
+        const region = {
           id: viewRegion.id,
           name: viewRegion.name,
           type: viewRegion.type,
@@ -121,7 +117,11 @@ export class HCMapDataService {
           inside: (viewRegion.type === 'town') ?
             geojson2h3.h3SetToMultiPolygonFeature(viewRegion.view) :
             undefined,
+          resources: [],
         }
+
+        this.indexRegion(viewRegion.view, region);
+        return region;
       }
     ).filter((r) => !!r);
   }
@@ -134,15 +134,41 @@ export class HCMapDataService {
     return resources.filter(
       (rawResource) => rawResource.level === hexLevel
     ).map(
-      (rawResource) => ({
-        id: rawResource.id,
-        title: rawResource.title,
-        description: rawResource.description,
-        category: rawResource.category,
-        hex: rawResource.hex,
-        outline: geojson2h3.h3ToFeature(rawResource.hex),
-      })
+      (rawResource) => {
+        const resource = {
+          id: rawResource.id,
+          title: rawResource.title,
+          description: rawResource.description,
+          category: rawResource.category,
+          hex: rawResource.hex,
+          outline: geojson2h3.h3ToFeature(rawResource.hex),
+        };
+
+        this.indexResource(rawResource.hex, resource);
+        return resource;
+      }
     );
+  }
+
+  private indexRegion(hexes: string[], region: HCMapRegion) {
+    hexes.forEach((hex) => {
+      this.allocateContents(hex);
+      this.contentsByHex[hex].regions.push(region);
+    });
+  }
+
+  private indexResource(hex: string, resource: HCMapResource) {
+    this.allocateContents(hex);
+    this.contentsByHex[hex].resources.push(resource);
+  }
+
+  private allocateContents(hex) {
+    if (!this.contentsByHex[hex]) {
+      this.contentsByHex[hex] = {
+        regions: [],
+        resources: [],
+      };
+    }
   }
 
   /* Get the indices of all hexagons of the given hexLevel contained in the bounds */

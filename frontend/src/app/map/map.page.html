@@ -3,5 +3,8 @@
 
 <div id="mapId" style="width: 100vw; height: calc(100%)"></div>
 
-<app-items-list class="items-list" [isHexSelected]="isHexSelected" [itemsList]="items"></app-items-list>
+<app-hex-contents
+  [isHexSelected]="isHexSelected"
+  [hexContents]="hexContents">
+</app-hex-contents>
 

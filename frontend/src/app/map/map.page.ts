@@ -1,6 +1,11 @@
 import { Component, HostBinding } from '@angular/core';
 import { DataService } from '../services/data.service';
-import { HCMapDataService, HCMapRegion, HCMapResource } from '../services/hcmap-data.service';
+import {
+  HCMapDataService,
+  HCMapRegion,
+  HCMapResource,
+  HexContents
+} from '../services/hcmap-data.service';
 import { Item } from '../interfaces/item';
 
 import * as Leaflet from 'leaflet';
@@ -11,41 +16,20 @@ import * as Leaflet from 'leaflet';
   styleUrls: ['./map.page.scss'],
 })
 export class MapPage {
-  map: Leaflet.Map;
-  /* markersLayer = new Leaflet.LayerGroup(); */
+  private map: Leaflet.Map;
 
-  hexLayer = new Leaflet.LayerGroup();
-  isHexSelected: boolean = false;
-  queryText = '';
-  currentCategory = '';
-  items: Item[] = [];
-
-  /* // excludeTracks: any = []; */
-  /* markerIcon = { */
-  /*   icon: Leaflet.icon({ */
-  /*     iconSize: [25, 41], */
-  /*     iconAnchor: [10, 41], */
-  /*     popupAnchor: [2, -40], */
-  /*     // specify the path here */
-  /*     iconUrl: "https://unpkg.com/leaflet@1.5.1/dist/images/marker-icon.png", */
-  /*     shadowUrl: "https://unpkg.com/leaflet@1.5.1/dist/images/marker-shadow.png" */
-  /*   }) */
-  /* }; */
+  private hexLayer = new Leaflet.LayerGroup();
+  private isHexSelected: boolean = false;
+  private queryText = '';
+  private currentCategory = '';
+  private hexContents: HexContents;
 
   appMapClass: string = 'show-header';
   @HostBinding('class') get Class() {
     return this.appMapClass;
   }
 
-  /* constructor(private data: DataService) { } */
   constructor(private data: HCMapDataService) {}
-
-  /* updateMarkers() { */
-  /*   this.markersLayer.clearLayers(); */
-  /*   this.items.forEach(item => { */
-  /*     let marker = Leaflet.marker({ lat: item.lat, lng: item.lng }, this.markerIcon).addTo(this.markersLayer); */
-  /*   }) */
-  /* } */
 
   ionViewWillLeave() {
     this.map.remove();
@@ -79,7 +63,6 @@ export class MapPage {
       attribution: ''
     }).addTo(this.map);
 
-    /* this.markersLayer.addTo(this.map); */
     this.hexLayer.addTo(this.map);
 
     this.data.mapData.subscribe(
@@ -92,12 +75,10 @@ export class MapPage {
     );
 
     // first render
-    /* this.renderDemo(); */
     this.data.setViewport(this.map.getBounds(), this.map.getZoom());
 
     // recalculate render on drag and zoom
     this.map.on('zoomend dragend', (e: Leaflet.LeafletMouseEvent) => {
-      /* this.renderDemo(); */
       this.data.setViewport(this.map.getBounds(), this.map.getZoom());
     });
   }
@@ -116,11 +97,13 @@ export class MapPage {
 
       // add hover effect to show data
       feature.on({
-        mouseover: (evt) => {
-          this.items = this.data.getResourcesInHex(resource.hex);
+        click: (evt) => {
+          this.toggleSelectHexagon();
+        }, mouseover: (evt) => {
+          this.hexContents = this.data.getContentsAtHex(resource.hex);
           this.toggleSelectHexagon();
         }, mouseout: (evt) => {
-          this.items = [];
+          this.hexContents = undefined;
           this.toggleSelectHexagon();
         }
       });
