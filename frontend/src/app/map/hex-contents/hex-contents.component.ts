@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnChanges, Input } from '@angular/core';
 import { HexContents } from '../../services/hcmap-data.service';
 
 @Component({
@@ -6,13 +6,21 @@ import { HexContents } from '../../services/hcmap-data.service';
   templateUrl: './hex-contents.component.html',
   styleUrls: ['./hex-contents.component.scss'],
 })
-export class HexContentsComponent implements OnInit {
+export class HexContentsComponent implements OnChanges {
 
   @Input() hexContents: HexContents;
-  @Input() isHexSelected:boolean = false;
+  @Input() isOpen:boolean = false;
 
   constructor() {}
 
-  ngOnInit() {}
+  ngOnChanges() {
+    /* console.log('HexContents'); */
+    /* if (this.hexContents) { */
+    /*   console.log('regions:', this.hexContents.regions); */
+    /*   console.log('resources:', this.hexContents.resources); */
+    /* } else { */
+    /*   console.log('empty'); */
+    /* } */
+  }
 
 }

@@ -20,6 +20,7 @@ export class MapPage {
 
   private hexLayer = new Leaflet.LayerGroup();
   private isHexSelected: boolean = false;
+  private isHexLocked: boolean = false;
   private queryText = '';
   private currentCategory = '';
   private hexContents: HexContents;
@@ -95,16 +96,20 @@ export class MapPage {
         }
       }).addTo(this.hexLayer);
 
-      // add hover effect to show data
+      // add hover and click events to show data
       feature.on({
         click: (evt) => {
-          this.toggleSelectHexagon();
+          this.isHexLocked = !this.isHexLocked;
         }, mouseover: (evt) => {
           this.hexContents = this.data.getContentsAtHex(resource.hex);
-          this.toggleSelectHexagon();
+          if (!this.isHexLocked) {
+            this.toggleSelectHexagon();
+          }
         }, mouseout: (evt) => {
-          this.hexContents = undefined;
-          this.toggleSelectHexagon();
+          if (!this.isHexLocked) {
+            this.hexContents = undefined;
+            this.toggleSelectHexagon();
+          }
         }
       });
     });

@@ -22,6 +22,7 @@ export interface HCMapResource {
   description: string;
   category: string;
   hex: string;
+  regionId?: string;
   outline: geojson2h3.GeoJsonObject;   // GeoJSON shape of the containing hex at the given hexLevel
 }
 
@@ -40,6 +41,7 @@ export class HCMapDataService {
 
   public mapData: Observable<MapData> = new Subject<MapData>();
 
+  private regionsById: Map<string, HCMapRegion>;
   private contentsByHex: Map<string, HexContents>;
 
   /* Recalculate all mapData in the new viewport */
@@ -50,6 +52,7 @@ export class HCMapDataService {
     console.log('Map zoom:', zoom);
     console.log('Hex level:', hexLevel);
 
+    this.regionsById = new Map<string, HCMapRegion>();
     this.contentsByHex = new Map<string, HexContents>();
 
     const regions = this.getRegions(extBounds, hexLevel);
@@ -142,6 +145,7 @@ export class HCMapDataService {
           category: rawResource.category,
           hex: rawResource.hex,
           outline: geojson2h3.h3ToFeature(rawResource.hex),
+          regionId: rawResource.regionId,
         };
 
         this.indexResource(rawResource.hex, resource);
@@ -155,11 +159,19 @@ export class HCMapDataService {
       this.allocateContents(hex);
       this.contentsByHex[hex].regions.push(region);
     });
+    this.regionsById[region.id] = region;
   }
 
   private indexResource(hex: string, resource: HCMapResource) {
     this.allocateContents(hex);
     this.contentsByHex[hex].resources.push(resource);
+
+    if (resource.regionId) {
+      const region = this.regionsById[resource.regionId];
+      if (region) {
+        region.resources.push(resource);
+      }
+    }
   }
 
   private allocateContents(hex) {

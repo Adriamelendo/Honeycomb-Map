@@ -7,7 +7,9 @@ import { IonicModule } from '@ionic/angular';
 import { MapPageRoutingModule } from './map-routing.module';
 import { MapHeaderComponent } from './map-header/map-header.component';
 import { HexContentsComponent } from './hex-contents/hex-contents.component';
-import { ItemComponent } from './item/item.component';
+import { RegionCardComponent } from './region-card/region-card.component';
+import { ResourcesCardComponent } from './resources-card/resources-card.component';
+import { ResourceItemComponent } from './resource-item/resource-item.component';
 
 import { MapPage } from './map.page';
 
@@ -22,7 +24,9 @@ import { MapPage } from './map.page';
     MapPage,
     MapHeaderComponent,
     HexContentsComponent,
-    ItemComponent,
+    RegionCardComponent,
+    ResourcesCardComponent,
+    ResourceItemComponent,
   ]
 })
 export class MapPageModule {}

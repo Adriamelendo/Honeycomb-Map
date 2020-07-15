@@ -1,10 +1,13 @@
-<div [ngClass]="{'right-panel': true, 'open-panel': isHexSelected, 'close-panel': !isHexSelected}">
+<div
+  *ngIf="hexContents"
+  [ngClass]="{'right-panel': true, 'open-panel': isOpen, 'close-panel': !isOpen}">
   <div class="vertical-scroll">
-    <ion-list *ngIf="hexContents">
-      <app-item
-        *ngFor="let resource of hexContents.resources"
-        [item]="resource">
-      </app-item>
-    </ion-list>
+    <app-region-card
+      *ngFor="let region of hexContents.regions"
+      [region]="region">
+    </app-region-card>
+    <app-resources-card
+      [resources]="hexContents.resources">
+    </app-resources-card>
   </div>
 </div>

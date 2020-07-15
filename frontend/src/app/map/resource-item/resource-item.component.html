@@ -1,0 +1,16 @@
+<ion-item *ngIf="resource" [routerLink]="'/item/' + resource.id" [detail]="false">
+  <div slot="start" [class]="!resource.read ? 'dot dot-unread' : 'dot dot-read'"></div>
+  <ion-label class="ion-text-wrap">    
+    <h2>{{ resource.title }}</h2>
+    <h3>
+      {{ resource.owner }}
+      <span class="date">
+        <ion-note>{{ resource.date }}</ion-note>
+        <ion-icon name="chevron-forward" size="small" *ngIf="isIos()"></ion-icon>
+      </span>
+    </h3>
+    <p>
+      {{ resource.description }}
+    </p>
+  </ion-label>
+</ion-item>
