@@ -106,24 +106,27 @@ export class MapPage {
         }
       }).addTo(this.hexLayer);
 
-      // add hover and click events to show data
+      // add click events to show data
       feature.on({
         click: (evt) => {
-          this.hexContents = this.data.getContentsAtHex(resource.hex);
-
-          if (this.HexLocked !== resource.hex) {
-            this.HexLocked = resource.hex;
-            this.showSelectHexagon();
-          }
-          else{
-            this.hexContents = undefined;
-            this.HexLocked = '';
-            this.hideSelectHexagon();
-          }
-
+          this.clickEvent(resource.hex);
         }
       });
     });
+  }
+
+  clickEvent(hex){
+    this.hexContents = this.data.getContentsAtHex(hex);
+
+    if (this.HexLocked !== hex) {
+      this.HexLocked = hex;
+      this.showSelectHexagon();
+    }
+    else{
+      this.hexContents = undefined;
+      this.HexLocked = '';
+      this.hideSelectHexagon();
+    }
   }
 
   drawRegions(regions: HCMapRegion[]) {
