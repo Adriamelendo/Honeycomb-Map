@@ -17,17 +17,22 @@ export class HexContentsComponent implements OnChanges {
   constructor() { }
 
   ngOnChanges() {
+    console.log('HexContents');
     if (this.hexContents) {
-      console.log('HexContents');
+      console.log('regions:', this.hexContents.regions);
+      console.log('resources:', this.hexContents.resources);
+
       this.towns = [];
       this.provinces = [];
 
       this.hexContents.regions.forEach(reg => {
-        if (reg.type === 'town') {
-          this.towns.push(reg);
-        }
-        if (reg.type === 'province') {
-          this.provinces.push(reg);
+        if (reg.resources.length !== 0) {
+          if (reg.type === 'town') {
+            this.towns.push(reg);
+          }
+          if (reg.type === 'province') {
+            this.provinces.push(reg);
+          }
         }
       });
 
