@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import * as L from 'leaflet';
 import * as geojson2h3 from 'geojson2h3';
 import * as h3 from 'h3-js';
@@ -39,7 +39,7 @@ export interface HexContents {
 })
 export class HCMapDataService {
 
-  public mapData: Observable<MapData> = new Subject<MapData>();
+  public mapData: BehaviorSubject<MapData> = new BehaviorSubject<MapData>([undefined, undefined]);
 
   private regionsById: Map<string, HCMapRegion>;
   private contentsByHex: Map<string, HexContents>;
@@ -58,7 +58,16 @@ export class HCMapDataService {
     const regions = this.getRegions(extBounds, hexLevel);
     const resources = this.getResources(extBounds, hexLevel);
 
-    (this.mapData as Subject<MapData>).next([regions, resources]);
+    this.mapData.next([regions, resources]);
+  }
+  public getResourceOfId(id: number): HCMapResource {
+    const current_resources = this.mapData.getValue()[1];
+    if (current_resources) {
+      return current_resources.find(res => res.id === id);
+    } else {
+      // esto no es nada optimo tardara muchisimo
+      return resources.find(res => res.id === id);
+    }
   }
 
   /* Get all contents at a given hex */

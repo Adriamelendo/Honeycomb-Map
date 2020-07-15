@@ -31,7 +31,7 @@ export class MapPage {
     return this.appMapClass;
   }
 
-  constructor(private data: HCMapDataService) {}
+  constructor(private data: HCMapDataService) { }
 
   ionViewWillLeave() {
     this.map.remove();
@@ -71,9 +71,9 @@ export class MapPage {
   leafletMap() {
     // Madrid 
     // this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 12);
-    
+
     // Carrión de Calatrava
-    this.map = new Leaflet.Map('mapId').setView([39.018932,-3.8261683], 12);
+    this.map = new Leaflet.Map('mapId').setView([39.018932, -3.8261683], 12);
 
     Leaflet.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: ''
@@ -84,9 +84,11 @@ export class MapPage {
     this.data.mapData.subscribe(
       // TODO: unsubscribe on component destroy
       ([regions, resources]) => {
-        this.hexLayer.clearLayers();
-        this.drawRegions(regions);
-        this.drawResources(resources);
+        if (regions && resources) {
+          this.hexLayer.clearLayers();
+          this.drawRegions(regions);
+          this.drawResources(resources);
+        }
       }
     );
 
@@ -120,14 +122,14 @@ export class MapPage {
     });
   }
 
-  clickEvent(hex){
+  clickEvent(hex) {
     this.hexContents = this.data.getContentsAtHex(hex);
 
     if (this.HexLocked !== hex) {
       this.HexLocked = hex;
       this.showSelectHexagon();
     }
-    else{
+    else {
       this.hexContents = undefined;
       this.HexLocked = '';
       this.hideSelectHexagon();

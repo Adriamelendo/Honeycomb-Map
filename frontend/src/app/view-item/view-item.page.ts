@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { DataService } from '../services/data.service';
+import { HCMapResource, HCMapDataService } from '../services/hcmap-data.service';
 import { Item } from '../interfaces/item';
 
 @Component({
@@ -9,26 +9,24 @@ import { Item } from '../interfaces/item';
   styleUrls: ['./view-item.page.scss'],
 })
 export class ViewItemPage implements OnInit {
-  public item: Item;
+  public item: HCMapResource;
 
   constructor(
-    private data: DataService,
+    private data: HCMapDataService,
     private activatedRoute: ActivatedRoute
   ) { }
 
   async ngOnInit() {
     const id = this.activatedRoute.snapshot.paramMap.get('id');
-    this.item = this.data.getItemById(id);
-    if(this.item !== undefined) {
-      this.item.read=true;
-    } else { 
+    this.item = this.data.getResourceOfId(parseInt(id));
+    if(this.item == undefined) {
       console.log('Item '+id+' is not inside current data, retriving from backend');
-      this.item = await this.data.getItemByIdFromBackend(id);
-      if(this.item !== undefined) {
-        this.item.read=true;
-      } else { 
-        console.log('Item '+id+' do not exist in backend');
-      }
+      // this.item = await this.data.getItemByIdFromBackend(id);
+      // if(this.item !== undefined) {
+      //   this.item.read=true;
+      // } else { 
+      //   console.log('Item '+id+' do not exist in backend');
+      // }
     }
   }
 
