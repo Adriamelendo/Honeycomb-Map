@@ -197,8 +197,10 @@ export class MapPage implements OnInit {
         feature.on({
           mouseover: (evt) => {
             this.items = this.resourcesByHex[resource.hex];
+            this.toggleSelectHexagon();
           }, mouseout: (evt) => {
             this.items = [];
+            this.toggleSelectHexagon();
           }
         });
       }
