@@ -149,9 +149,9 @@ export class MapPage implements OnInit {
     this.drawResources(this.zoomFilter(resources));
   }
 
-  regionsInList(listNames: string[], regions: any[]) {
+  regionsInList(listIds: string[], regions: any[]) {
     return regions.filter(
-      (region) => (listNames.indexOf(region.name) !== -1)
+      (region) => (listIds.indexOf(region.id) !== -1)
     );
   }
 
@@ -254,7 +254,7 @@ export class MapPage implements OnInit {
     return regions.filter(
       (region) => this.findCommonElements(region.search, listHex)
     ).map(
-      (region) => region.name
+      (region) => region.id
     );
   }
 

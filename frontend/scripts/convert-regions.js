@@ -29,7 +29,7 @@ function searchHexes(id,geo_shape, level) {
 }
 
 function viewHexes(id,geo_shape, level) { 
-  if(level==8) return level8Reference[id];
+  if(level==8 && level8Reference[id] != undefined) return level8Reference[id];
   if (geo_shape.type === 'Polygon') {
     return h3.polyfill(geo_shape.coordinates, level, true);
   } else if (geo_shape.type === 'MultiPolygon') {
@@ -77,9 +77,9 @@ function convertResource(rawResource) {
 
 rawTowns = loadJSON(process.argv[2]).records;
 rawProvinces = loadJSON(process.argv[3]).records;
-var level8Reference = [];
-rawTowns.map((town) => level8Reference[town.id]=viewHexes(town.fields.geo_shape, 8));
-rawProvinces.map((province) => level8Reference[province.id]=viewHexes(province.fields.geo_shape, 8));
+level8Reference = [];
+rawTowns.forEach((town) => level8Reference[town.recordid]=viewHexes(town.recordid,town.fields.geo_shape, 8));
+rawProvinces.forEach((province) => level8Reference[province.recordid]=viewHexes(province.recordid,province.fields.geo_shape, 8));
 
 regions = {  
   8: rawTowns.map((town) => convertTown(town, 8))
