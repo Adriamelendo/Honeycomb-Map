@@ -32,6 +32,34 @@
   transform: translateY(-30vh);    
 }
 
+.first-right-panel { 
+  position: absolute;
+  z-index:1000;     
+  overflow-y: auto; 
+  transition: transform 1.3s;  
+  transform: translateY(0);
+  
+  padding: 10px 10px 0 10px;
+  width: 100vw;
+
+  box-sizing: border-box;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 4px 16px;
+  border-radius: 8px 8px 0 0;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+
+  background-color: white;
+  height: 80vh; //50 of show header + 30 of open panel
+}
+
+.first-close-panel {
+  transform: translateY(0);
+}
+
+.first-open-panel {
+  transform: translateY(-30vh);    
+}
+
 @media (min-width: 680px) {
   :host {
     min-height: 0vh;
@@ -42,17 +70,37 @@
     border-radius: 8px;
     padding: 10px;
     transition: transform 0.5s;
-    transform: translateX(30vw);
-    width: 300px;
+    transform: translateX(0);
+    width: 20vw;
     height: auto; 
+        
+  }
+  .first-panel {
     top: 132px;
     bottom: 20px;    
     left: auto;
-    right: 10px;    
+    right: 22vw;
   }
 
+  .second-upper-pannel {
+    height: 40%;
+    top: 132px;
+    bottom: auto;    
+    left: auto;
+    right: 1vw;
+  }
+
+  .second-lower-pannel {
+    height: 40%;
+    top: auto;
+    bottom: 20px;    
+    left: auto;
+    right: 1vw;
+  }
+
+
   .close-panel {
-    transform: translateX(30vw);
+    transform: translateX(0);
   }
 
   .open-panel {

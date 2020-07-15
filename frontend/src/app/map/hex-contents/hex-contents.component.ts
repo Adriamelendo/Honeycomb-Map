@@ -1,5 +1,5 @@
 import { Component, OnChanges, Input } from '@angular/core';
-import { HexContents } from '../../services/hcmap-data.service';
+import { HCMapRegion, HexContents } from '../../services/hcmap-data.service';
 
 @Component({
   selector: 'app-hex-contents',
@@ -9,18 +9,32 @@ import { HexContents } from '../../services/hcmap-data.service';
 export class HexContentsComponent implements OnChanges {
 
   @Input() hexContents: HexContents;
-  @Input() isOpen:boolean = false;
+  @Input() isOpen: boolean = false;
+  towns: HCMapRegion[] = [];
+  provinces: HCMapRegion[] = [];
 
-  constructor() {}
+
+  constructor() { }
 
   ngOnChanges() {
-    /* console.log('HexContents'); */
-    /* if (this.hexContents) { */
-    /*   console.log('regions:', this.hexContents.regions); */
-    /*   console.log('resources:', this.hexContents.resources); */
-    /* } else { */
-    /*   console.log('empty'); */
-    /* } */
+    if (this.hexContents) {
+      console.log('HexContents');
+      this.towns = [];
+      this.provinces = [];
+
+      this.hexContents.regions.forEach(reg => {
+        if (reg.type === 'town') {
+          this.towns.push(reg);
+        }
+        if (reg.type === 'province') {
+          this.provinces.push(reg);
+        }
+      });
+
+    } else {
+      console.log('empty');
+    }
+
   }
 
 }

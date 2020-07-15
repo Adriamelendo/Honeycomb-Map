@@ -1,13 +1,39 @@
 <div
-  *ngIf="hexContents"
-  [ngClass]="{'right-panel': true, 'open-panel': isOpen, 'close-panel': !isOpen}">
-  <div class="vertical-scroll">
-    <app-region-card
-      *ngFor="let region of hexContents.regions"
-      [region]="region">
-    </app-region-card>
+  *ngIf="!hexContents"
+  [ngClass]="{'right-panel': true, 'second-upper-pannel':true}">
+  <div class="vertical-scroll">    
+    <p>No hay resultados</p>
+  </div>
+</div>
+
+<div
+  *ngIf="hexContents && hexContents.resources.length!==0"
+  [ngClass]="{'right-panel': true, 'first-panel':true}">
+  <div class="vertical-scroll">    
     <app-resources-card
       [resources]="hexContents.resources">
     </app-resources-card>
+  </div>
+</div>
+
+<div
+  *ngIf="this.towns.length!==0"
+  [ngClass]="{'right-panel': true, 'second-upper-pannel': true}">
+  <div class="vertical-scroll">
+    <app-region-card
+      *ngFor="let town of towns"
+      [region]="town">
+    </app-region-card>    
+  </div>
+</div>
+
+<div
+  *ngIf="this.provinces.length!==0"
+  [ngClass]="{'right-panel': true, 'second-lower-pannel':true}">
+  <div class="vertical-scroll">
+    <app-region-card
+      *ngFor="let province of provinces"
+      [region]="province">
+    </app-region-card>    
   </div>
 </div>
