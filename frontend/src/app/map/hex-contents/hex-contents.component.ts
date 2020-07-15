@@ -12,15 +12,20 @@ export class HexContentsComponent implements OnChanges {
   @Input() isOpen: boolean = false;
   towns: HCMapRegion[] = [];
   provinces: HCMapRegion[] = [];
+  showNoResult: boolean = true;
 
 
   constructor() { }
 
   ngOnChanges() {
     console.log('HexContents');
+    this.showNoResult = true;
     if (this.hexContents) {
       console.log('regions:', this.hexContents.regions);
       console.log('resources:', this.hexContents.resources);
+      if (this.hexContents.resources.length !== 0) {
+        this.showNoResult = false;
+      }
 
       this.towns = [];
       this.provinces = [];
@@ -29,9 +34,11 @@ export class HexContentsComponent implements OnChanges {
         if (reg.resources.length !== 0) {
           if (reg.type === 'town') {
             this.towns.push(reg);
+            this.showNoResult = false;
           }
           if (reg.type === 'province') {
             this.provinces.push(reg);
+            this.showNoResult = false;
           }
         }
       });

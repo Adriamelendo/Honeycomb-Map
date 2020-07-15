@@ -69,7 +69,11 @@ export class MapPage {
   }
 
   leafletMap() {
-    this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 12);
+    // Madrid 
+    // this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 12);
+    
+    // Carrión de Calatrava
+    this.map = new Leaflet.Map('mapId').setView([39.018932,-3.8261683], 12);
 
     Leaflet.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: ''
