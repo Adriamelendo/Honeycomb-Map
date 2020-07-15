@@ -20,7 +20,7 @@ export class MapPage {
 
   private hexLayer = new Leaflet.LayerGroup();
   private isHexSelected: boolean = false;
-  private isHexLocked: boolean = false;
+  private HexLocked: string;
   private queryText = '';
   private currentCategory = '';
   private hexContents: HexContents;
@@ -47,10 +47,20 @@ export class MapPage {
   toggleSelectHexagon() {
     this.isHexSelected = !this.isHexSelected;
     if (this.isHexSelected) {
-      this.appMapClass = 'hide-header';
+      this.hideSelectHexagon();
     } else {
-      this.appMapClass = 'show-header';
+      this.showSelectHexagon();
     }
+  }
+
+  showSelectHexagon() {
+    this.isHexSelected = true;
+    this.appMapClass = 'show-header';
+  }
+
+  hideSelectHexagon() {
+    this.isHexSelected = false;
+    this.appMapClass = 'hide-header';
   }
 
   ionViewDidEnter() {
@@ -99,17 +109,18 @@ export class MapPage {
       // add hover and click events to show data
       feature.on({
         click: (evt) => {
-          this.isHexLocked = !this.isHexLocked;
-        }, mouseover: (evt) => {
           this.hexContents = this.data.getContentsAtHex(resource.hex);
-          if (!this.isHexLocked) {
-            this.toggleSelectHexagon();
+
+          if (this.HexLocked !== resource.hex) {
+            this.HexLocked = resource.hex;
+            this.showSelectHexagon();
           }
-        }, mouseout: (evt) => {
-          if (!this.isHexLocked) {
+          else{
             this.hexContents = undefined;
-            this.toggleSelectHexagon();
+            this.HexLocked = '';
+            this.hideSelectHexagon();
           }
+
         }
       });
     });
