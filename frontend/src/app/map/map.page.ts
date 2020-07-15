@@ -9,6 +9,7 @@ import {
 import { Item } from '../interfaces/item';
 
 import * as Leaflet from 'leaflet';
+import * as h3 from 'h3-js';
 
 @Component({
   selector: 'app-map',
@@ -132,15 +133,26 @@ export class MapPage {
   drawRegions(regions: HCMapRegion[]) {
     regions.forEach(region => {
       if (region.type === 'province') {
-        Leaflet.geoJSON(region.boundary, {
+        const feature = Leaflet.geoJSON(region.boundary, {
           style: {
             stroke: true,
-            fill: false,
+            fill: true,
             weight: 2,
+            fillOpacity: 0,
             opacity: 1,
             color: '#fd8d3c'
           }
         }).addTo(this.hexLayer);
+
+        // add click events to show data
+        feature.on({
+          click: (evt) => {
+            const level = this.data.getHexLevel(this.map.getZoom());
+            const hex = h3.geoToH3(evt.latlng.lat, evt.latlng.lng, level);
+            this.clickEvent(hex);
+          }
+        });
+
       } else if (region.type === 'town') {
         Leaflet.geoJSON(region.boundary, {
           style: {
