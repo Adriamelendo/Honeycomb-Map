@@ -1,8 +1,8 @@
-<ion-card *ngIf="region.resources.length > 0">
-  <ion-subtitle>{{ regionTitle() }}</ion-subtitle>
-  <ion-title>{{ region.name }}</ion-title>
-  <app-resource-item
-    *ngFor="let resource of region.resources"
-    [resource]="resource">
-  </app-resource-item>
-</ion-card>
+<div *ngIf="region.resources.length > 0">
+  <h1>{{ regionTitle() }}</h1>
+  <h2>{{ region.name }}</h2>
+  <div class="vertical-scroll">
+    <app-resource-item *ngFor="let resource of region.resources" [resource]="resource">
+    </app-resource-item>
+  </div>
+</div>

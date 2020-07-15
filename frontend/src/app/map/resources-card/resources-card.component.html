@@ -1,7 +1,7 @@
-<ion-card>
-  <ion-title>En 1km a la redonda</ion-title>
-  <app-resource-item
-    *ngFor="let resource of resources"
-    [resource]="resource">
-  </app-resource-item>
-</ion-card>
+<div>
+  <h1>En 1km a la redonda</h1>
+  <div class="vertical-scroll">
+    <app-resource-item *ngFor="let resource of resources" [resource]="resource">
+    </app-resource-item>
+  </div>
+</div>
