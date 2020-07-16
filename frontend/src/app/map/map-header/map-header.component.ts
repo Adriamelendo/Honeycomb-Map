@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-// import { ModalController, IonRouterOutlet } from '@ionic/angular';
+import { Component, OnInit, Output, EventEmitter, ViewChild } from '@angular/core';
+import { IonSearchbar } from '@ionic/angular';
 
 @Component({
   selector: 'app-map-header',
@@ -7,44 +7,38 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
   styleUrls: ['./map-header.component.scss'],
 })
 export class MapHeaderComponent implements OnInit {
-  @Input() isHexSelected:boolean=false;
   @Output() newSearch = new EventEmitter<string>();
   @Output() changeCategory = new EventEmitter<string>();
 
-  howSearchbar: boolean;
-  searchText = '';
-  category = 'all';
+  @ViewChild(IonSearchbar) searchbar: IonSearchbar;
 
-  constructor() { }
-  // constructor(
-  //   public modalCtrl: ModalController,
-  //   public routerOutlet: IonRouterOutlet
-  // ) { }
+  public showSearchbar = false;
+  public searchText = '';
+  public category = '';
 
-  ngOnInit() {}
+  public constructor() { }
 
-  updateSearch() {
-    this.newSearch.emit(this.searchText);
+  public ngOnInit() {}
+
+  public openSearchbar() {
+    this.showSearchbar = true;
+    setTimeout(() => this.searchbar.setFocus(), 500);
   }
-  updateCategory() {
+
+  public closeSearchbar() {
+    this.showSearchbar = false;
+    this.searchText = '';
+    this.updateSearch();
+  }
+
+  public updateSearch() {
+    if (this.searchText.length === 0 ||
+        this.searchText.length > 3) {
+      this.newSearch.emit(this.searchText);
+    }
+  }
+
+  public updateCategory() {
     this.changeCategory.emit(this.category);
   }
-
-    // async createModelWithReturn() {
-  //   const modal = await this.modalCtrl.create({
-  //     component:  YourComponent ,
-  //     swipeToClose: true,
-  //     mode: 'ios', //to show as stack over
-  //     presentingElement: this.routerOutlet.nativeEl,
-  //     componentProps: { excludedTracks: this.excludeTracks }
-  //   });
-  //   await modal.present();
-
-  //   const { data } = await modal.onWillDismiss();
-  //   if (data) {
-  //     this.excludeTracks = data;
-  //     // this.updateWhatever();
-  //   }
-  // }
-
 }

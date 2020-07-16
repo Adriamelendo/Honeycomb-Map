@@ -20,9 +20,8 @@ export class MapPage {
   private map: Leaflet.Map;
 
   private hexLayer = new Leaflet.LayerGroup();
-  private isHexSelected: boolean = false;
-  private HexLocked: string;
-  private queryText = '';
+  private hexLocked: string;
+  private searchText = '';
   private currentCategory = '';
   private hexContents: HexContents;
 
@@ -33,42 +32,25 @@ export class MapPage {
 
   constructor(private data: HCMapDataService) { }
 
+  ionViewDidEnter() {
+    this.addMap();
+  }
+
   ionViewWillLeave() {
     this.map.remove();
   }
 
   onChangeCategory(c: string) {
     this.currentCategory = c;
+    this.calculateData();
   }
 
   onNewSearch(q: string) {
-    this.queryText = q;
+    this.searchText = q;
+    this.calculateData();
   }
 
-  toggleSelectHexagon() {
-    this.isHexSelected = !this.isHexSelected;
-    if (this.isHexSelected) {
-      this.hideSelectHexagon();
-    } else {
-      this.showSelectHexagon();
-    }
-  }
-
-  showSelectHexagon() {
-    this.isHexSelected = true;
-    this.appMapClass = 'show-header';
-  }
-
-  hideSelectHexagon() {
-    this.isHexSelected = false;
-    this.appMapClass = 'hide-header';
-  }
-
-  ionViewDidEnter() {
-    this.leafletMap();
-  }
-
-  leafletMap() {
+  private addMap() {
     // Madrid 
     // this.map = new Leaflet.Map('mapId').setView([40.428122, -3.696058], 12);
 
@@ -93,15 +75,27 @@ export class MapPage {
     );
 
     // first render
-    this.data.setViewport(this.map.getBounds(), this.map.getZoom());
+    this.calculateData();
 
     // recalculate render on drag and zoom
     this.map.on('zoomend dragend', (e: Leaflet.LeafletMouseEvent) => {
-      this.data.setViewport(this.map.getBounds(), this.map.getZoom());
+      this.calculateData();
     });
   }
 
-  drawResources(resources: HCMapResource[]) {
+  private calculateData() {
+    this.hexContents = undefined;
+    this.hexLocked = '';
+    this.hideSelectHexagon();
+    this.data.setViewport(
+      this.map.getBounds(),
+      this.map.getZoom(),
+      this.currentCategory,
+      this.searchText,
+    );
+  }
+
+  private drawResources(resources: HCMapResource[]) {
     resources.forEach(resource => {
       const feature = Leaflet.geoJSON(resource.outline, {
         style: {
@@ -116,27 +110,13 @@ export class MapPage {
       // add click events to show data
       feature.on({
         click: (evt) => {
-          this.clickEvent(resource.hex);
+          this.hexClicked(resource.hex);
         }
       });
     });
   }
 
-  clickEvent(hex) {
-    this.hexContents = this.data.getContentsAtHex(hex);
-
-    if (this.HexLocked !== hex) {
-      this.HexLocked = hex;
-      this.showSelectHexagon();
-    }
-    else {
-      this.hexContents = undefined;
-      this.HexLocked = '';
-      this.hideSelectHexagon();
-    }
-  }
-
-  drawRegions(regions: HCMapRegion[]) {
+  private drawRegions(regions: HCMapRegion[]) {
     regions.forEach(region => {
       if (region.type === 'province') {
         const feature = Leaflet.geoJSON(region.boundary, {
@@ -155,7 +135,7 @@ export class MapPage {
           click: (evt) => {
             const level = this.data.getHexLevel(this.map.getZoom());
             const hex = h3.geoToH3(evt.latlng.lat, evt.latlng.lng, level);
-            this.clickEvent(hex);
+            this.hexClicked(hex);
           }
         });
 
@@ -181,5 +161,27 @@ export class MapPage {
         }).addTo(this.hexLayer);
       }
     });
+  }
+
+  private hexClicked(hex) {
+    this.hexContents = this.data.getContentsAtHex(hex);
+
+    if (this.hexLocked !== hex) {
+      this.hexLocked = hex;
+      this.showSelectHexagon();
+    }
+    else {
+      this.hexContents = undefined;
+      this.hexLocked = '';
+      this.hideSelectHexagon();
+    }
+  }
+
+  private showSelectHexagon() {
+    this.appMapClass = 'show-header';
+  }
+
+  private hideSelectHexagon() {
+    this.appMapClass = 'hide-header';
   }
 }

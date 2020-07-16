@@ -31,6 +31,7 @@
     "cordova-plugin-geolocation": "^4.0.2",
     "geojson2h3": "^1.0.1",
     "h3-js": "^3.6.4",
+    "latinize": "^0.4.1",
     "leaflet": "^1.6.0",
     "parse": "^2.13.0",
     "rxjs": "~6.5.1",

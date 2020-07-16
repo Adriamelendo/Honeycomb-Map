@@ -10,7 +10,7 @@
   overflow-y: auto; 
   transition: transform 1.3s;  
   transform: translateY(0);
-  
+
   padding: 10px 10px 0 10px;
   width: 100vw;
 
@@ -46,15 +46,8 @@
     transform: translateX(0);
     width: 20vw;
     height: auto; 
-        
   }
-  .first-panel {
-    top: 132px;
-    bottom: 20px;    
-    left: auto;
-    right: 22vw;
-  }
-  
+
   .unique-panel {
     top: 132px;
     bottom: 20px;    
@@ -62,7 +55,14 @@
     right: 1vw;
   }
 
-  .second-upper-pannel {
+  .first-panel {
+    top: 132px;
+    bottom: 20px;    
+    left: auto;
+    right: 22vw;
+  }
+
+  .second-upper-panel {
     height: 40%;
     top: 132px;
     bottom: auto;    
@@ -70,21 +70,19 @@
     right: 1vw;
   }
 
-  .second-lower-pannel {
+  .second-lower-panel {
     height: 40%;
     top: auto;
-    bottom: 20px;    
+    bottom: 20px;
     left: auto;
     right: 1vw;
   }
-
 
   .close-panel {
     transform: translateX(0);
   }
 
   .open-panel {
-      transform: translateX(0); //-10vw to bring closer to map center    
+    transform: translateX(0); //-10vw to bring closer to map center    
   }
-  
 }

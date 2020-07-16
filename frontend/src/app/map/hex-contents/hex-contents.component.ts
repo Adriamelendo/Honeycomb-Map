@@ -1,5 +1,5 @@
 import { Component, OnChanges, Input } from '@angular/core';
-import { HCMapRegion, HexContents } from '../../services/hcmap-data.service';
+import { HexContents, HCMapRegion, HCMapResource } from '../../services/hcmap-data.service';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 
 @Component({
@@ -10,81 +10,80 @@ import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 export class HexContentsComponent implements OnChanges {
 
   @Input() hexContents: HexContents;
-  @Input() isOpen: boolean = false;
-  towns: HCMapRegion[] = [];
-  provinces: HCMapRegion[] = [];
-  showNoResult: boolean = true;
 
-  layout1:boolean = true;
-  layout2:boolean = false;
-  layout3:boolean = false;
-  layout4:boolean = false;
-
-
+  public towns: HCMapRegion[];
+  public provinces: HCMapRegion[];
+  public resources: HCMapResource[];
 
   constructor() { }
 
   ngOnChanges() {
     console.log('HexContents');
-    this.showNoResult = true;
-    let numPanels = 0;
-    if (this.hexContents) {
-      console.log('regions:', this.hexContents.regions);
-      console.log('resources:', this.hexContents.resources);
-      if (this.hexContents.resources.length !== 0) {
-        this.showNoResult = false;
-        numPanels++;
-      }
 
+    if (this.hexContents) {
+      this.towns = this.hexContents.regions.filter(
+        (region) => (region.type === 'town' &&
+                     region.resources.length > 0)
+      );
+      this.provinces = this.hexContents.regions.filter(
+        (region) => (region.type === 'province' &&
+                     region.resources.length > 0)
+      );
+      this.resources = this.hexContents.resources;
+    } else {
       this.towns = [];
       this.provinces = [];
-
-      this.hexContents.regions.forEach(reg => {
-        if (reg.resources.length !== 0) {
-          if (reg.type === 'town') {
-            this.towns.push(reg);
-            this.showNoResult = false;
-            numPanels++;
-          }
-          if (reg.type === 'province') {
-            this.provinces.push(reg);
-            this.showNoResult = false;
-            numPanels++;
-          }
-        }
-      });
-      console.log('We must draw '+numPanels+' panels');
-      this.layout1=false;
-      this.layout2=false;
-      this.layout3=false;
-      this.layout4=false;
-      switch(numPanels) { 
-        case 3: { 
-           this.layout1=true;
-           console.log('layout1');
-           break; 
-        } 
-        case 2: { 
-          if (this.hexContents.resources.length == 0) {
-            this.layout2=true;
-            console.log('layout2');
-          } else {
-            this.layout3=true;
-            console.log('layout3');
-          }
-           break; 
-        } 
-        case 1: { 
-          this.layout4=true; 
-          console.log('layout4');
-          break; 
-       }
-     } 
-
-    } else {
-      console.log('empty');
+      this.resources = [];
     }
 
+    console.log('towns:', this.towns);
+    console.log('provinces:', this.towns);
+    console.log('resources:', this.resources);
   }
 
+  public hasTowns() {
+    return (this.towns.length > 0);
+  }
+
+  public hasProvinces() {
+    return (this.provinces.length > 0);
+  }
+
+  public hasResources() {
+    return (this.resources.length > 0);
+  }
+
+  public resourcesClass() {
+    let position;
+    if (!this.hasTowns() && !this.hasProvinces()) {
+      position = 'unique-panel';
+    } else if (this.hasTowns() && this.hasProvinces()) {
+      position = 'first-panel';
+    } else {
+      position = 'second-upper-panel';
+    }
+    return 'right-panel ' + position;
+  }
+
+  public townsClass() {
+    let position;
+    if (!this.hasResources() && !this.hasProvinces()) {
+      position = 'unique-panel';
+    } else if (this.hasResources() && !this.hasProvinces()) {
+      position = 'second-lower-panel';
+    } else {
+      position = 'second-upper-panel';
+    }
+    return 'right-panel ' + position;
+  }
+
+  public provincesClass() {
+    let position;
+    if (!this.hasResources() && !this.hasTowns()) {
+      position = 'unique-panel';
+    } else {
+      position = 'second-lower-panel';
+    }
+    return 'right-panel ' + position;
+  }
 }

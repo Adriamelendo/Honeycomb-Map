@@ -3,6 +3,7 @@ import { Observable, Subject } from 'rxjs';
 import * as L from 'leaflet';
 import * as geojson2h3 from 'geojson2h3';
 import * as h3 from 'h3-js';
+import * as latinize from 'latinize';
 
 import resources from '../../assets/data/resources.json';
 import regions from '../../assets/data/regions.json';
@@ -45,18 +46,25 @@ export class HCMapDataService {
   private contentsByHex: Map<string, HexContents>;
 
   /* Recalculate all mapData in the new viewport */
-  public setViewport(bounds: L.LatLngBounds, zoom: number) {
+  public setViewport(
+    bounds: L.LatLngBounds,
+    zoom: number,
+    category: string,
+    searchText: string,
+  ) {
     const hexLevel = this.getHexLevel(zoom);
     const extBounds = this.extendBounds(hexLevel, bounds);
 
     console.log('Map zoom:', zoom);
     console.log('Hex level:', hexLevel);
+    console.log('Category:', category);
+    console.log('Search text:', searchText);
 
     this.regionsById = new Map<string, HCMapRegion>();
     this.contentsByHex = new Map<string, HexContents>();
 
     const regions = this.getRegions(extBounds, hexLevel);
-    const resources = this.getResources(extBounds, hexLevel);
+    const resources = this.getResources(extBounds, hexLevel, category, searchText);
 
     this.mapData.next([regions, resources]);
   }
@@ -154,9 +162,16 @@ export class HCMapDataService {
    * Extract resources that fit inside the given bounds, and generate their GeoJSON shape
    * at the given hexLevel.
    */
-  private getResources(bounds: L.LatLngBounds, hexLevel: number): HCMapResource[] {
+  private getResources(
+    bounds: L.LatLngBounds,
+    hexLevel: number,
+    category: string,
+    searchText: string,
+  ): HCMapResource[] {
     return resources.filter(
-      (rawResource) => rawResource.level === hexLevel
+      (rawResource) => (rawResource.level === hexLevel &&
+                        this.matchesCategory(rawResource, category) &&
+                        this.matchesSearch(rawResource, searchText))
     ).map(
       (rawResource) => {
         const resource = this.makeResource(rawResource);
@@ -164,6 +179,20 @@ export class HCMapDataService {
         return resource;
       }
     );
+  }
+
+  private matchesCategory(rawResource: any, category: string) {
+    return (category === '') || (rawResource.category === category);
+  }
+
+  private matchesSearch(rawResource: any, searchText: string) {
+    if (searchText === '') {
+      return true;
+    }
+    const content = rawResource.title + ' ' + rawResource.description;
+    const normalizedContent = latinize(content).toLowerCase().trim();
+    const normalizedSearchText = latinize(searchText).toLowerCase().trim();
+    return normalizedContent.indexOf(normalizedSearchText) >= 0;
   }
 
   private makeResource(rawResource: any): HCMapResource {
