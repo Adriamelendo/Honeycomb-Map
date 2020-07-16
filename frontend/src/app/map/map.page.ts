@@ -104,7 +104,6 @@ export class MapPage {
           fill: true,
           fillColor: '#756bb1',
           fillOpacity: 0.3,
-          opacity: 1,
         }
       }).addTo(this.hexLayer);
 
@@ -123,11 +122,12 @@ export class MapPage {
         const feature = Leaflet.geoJSON(region.boundary, {
           style: {
             stroke: true,
-            fill: true,
-            weight: 2,
-            fillOpacity: 0,
             opacity: 1,
-            color: '#fd8d3c'
+            color: '#fd8d3c',
+            weight: 2,
+            fill: true,
+            fillColor: '#fd8d3c',
+            fillOpacity: (region.resources.length > 0) ? 0.1 : 0,
           }
         }).addTo(this.hexLayer);
 
@@ -144,10 +144,12 @@ export class MapPage {
         Leaflet.geoJSON(region.boundary, {
           style: {
             stroke: true,
-            fill: false,
-            weight: 2,
+            color: '#2e51ff',
             opacity: 1,
-            color: '#2e51ff'
+            weight: 2,
+            fill: true,
+            fillColor: '#2e51ff',
+            fillOpacity: (region.resources.length > 0) ? 0.1 : 0,
           }
         }).addTo(this.hexLayer);
 

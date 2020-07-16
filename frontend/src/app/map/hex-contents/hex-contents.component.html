@@ -1,7 +1,7 @@
 <div
-  *ngIf="!hasTowns() && !hasProvinces() && !hasResources()" 
+  *ngIf="hexContents && !hasTowns() && !hasProvinces() && !hasResources()" 
   [className]="'right-panel second-upper-panel'">
-  <p>Pulsa sobre un hexagono para ver los recursos.</p>
+  <p>No se han encontrado datos en este hexágono.</p>
 </div>
 
 <div
