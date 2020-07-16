@@ -12,9 +12,7 @@ export class RegionCardComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit() {
-    console.log(this.region);
-  }
+  ngOnInit() {}
 
   public regionTitle() {
     if (this.region.type === 'province') {

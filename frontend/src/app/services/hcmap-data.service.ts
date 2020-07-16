@@ -5,8 +5,8 @@ import * as geojson2h3 from 'geojson2h3';
 import * as h3 from 'h3-js';
 import * as latinize from 'latinize';
 
-import resources from '../../assets/data/resources.json';
-import regions from '../../assets/data/regions.json';
+import rawResources from '../../assets/data/resources.json';
+import rawRegions from '../../assets/data/regions.json';
 
 export interface HCMapRegion {
   id: string;
@@ -72,7 +72,11 @@ export class HCMapDataService {
 
   /* Search one particular resource */
   public getResourceById(id: number): HCMapResource | undefined {
-    const rawResource = resources.find(r => r.id === id);
+    const hexLevels = Object.keys(rawRegions);
+    const levelRawResources = (hexLevels.length > 0) ? 
+      rawResources[hexLevels[0]] :
+      [];
+    const rawResource = levelRawResources.find(r => r.id === id);
     if (!rawResource) {
       return undefined;
     } else {
@@ -111,31 +115,25 @@ export class HCMapDataService {
    * their GeoJSON shape at the given hexLevel.
    */
   private getRegions(bounds: L.LatLngBounds, hexLevel: number): HCMapRegion[] {
-    // 2 levels offset to optimize filters
-    const searchLevel = hexLevel - 2;
-
-    const searchHexList = this.getAllHexagons(bounds, searchLevel);
-    console.log('Search level ' + searchLevel + ' has ' + searchHexList.length + ' hexagons');
-
-    const rawRegions = regions[searchLevel] || [];
-    /* console.log('Raw regions', rawRegions); */
-
-    return rawRegions.filter(
-      (rawRegion) => this.haveCommonElements(rawRegion.search, searchHexList)
+    const levelRawRegions = rawRegions[hexLevel] || [];
+    return levelRawRegions.filter(
+      (rawRegion) => this.intersectsWithBounds(rawRegion.container, bounds)
     ).map(
       (rawRegion) => {
-        const viewRawRegion = (regions[hexLevel] || []).find(
-          (r) => (r.id === rawRegion.id)
-        );
-        if (!viewRawRegion) {
-          return undefined;
-        } else {
-          const region = this.makeRegion(viewRawRegion);
-          this.indexRegion(viewRawRegion.view, region);
-          return region;
-        }
+        const region = this.makeRegion(rawRegion);
+        this.indexRegion(rawRegion.hexes, region);
+        return region;
       }
-    ).filter((r) => !!r);
+    );
+  }
+
+  private intersectsWithBounds(container: any, bounds: L.LatLngBounds) {
+    return (
+      container.east >= bounds.getWest() &&
+      container.west <= bounds.getEast() &&
+      container.north >= bounds.getSouth() &&
+      container.south <= bounds.getNorth()
+    );
   }
 
   private makeRegion(rawRegion: any): HCMapRegion {
@@ -143,9 +141,9 @@ export class HCMapDataService {
       id: rawRegion.id,
       name: rawRegion.name,
       type: rawRegion.type,
-      boundary: geojson2h3.h3SetToFeature(rawRegion.view),
+      boundary: geojson2h3.h3SetToFeature(rawRegion.hexes),
       inside: (rawRegion.type === 'town') ?
-        geojson2h3.h3SetToMultiPolygonFeature(rawRegion.view) :
+        geojson2h3.h3SetToMultiPolygonFeature(rawRegion.hexes) :
         undefined,
       resources: [],
     }
@@ -169,9 +167,9 @@ export class HCMapDataService {
     category: string,
     searchText: string,
   ): HCMapResource[] {
-    return resources.filter(
-      (rawResource) => (rawResource.level === hexLevel &&
-                        this.matchesCategory(rawResource, category) &&
+    const levelRawResources = rawResources[hexLevel] || [];
+    return levelRawResources.filter(
+      (rawResource) => (this.matchesCategory(rawResource, category) &&
                         this.matchesSearch(rawResource, searchText))
     ).map(
       (rawResource) => {
@@ -228,25 +226,6 @@ export class HCMapDataService {
         resources: [],
       };
     }
-  }
-
-  /* Get the indices of all hexagons of the given hexLevel contained in the bounds */
-  private getAllHexagons(bounds: L.LatLngBounds, hexLevel: number): string[] {
-    return h3.polyfill(this.bounds2Rect(bounds), hexLevel);
-  }
-
-  /* Convert a LatLngBounds into a rectangular polygon */
-  private bounds2Rect(bounds: L.LatLngBounds): Array<[number, number]> {
-    return [
-      [bounds.getNorth(), bounds.getWest()],
-      [bounds.getNorth(), bounds.getEast()],
-      [bounds.getSouth(), bounds.getEast()],
-      [bounds.getSouth(), bounds.getWest()],
-    ];
-  }
-
-  private haveCommonElements<T>(arr1: Array<T>, arr2: Array<T>): boolean {
-    return arr1.some(item => arr2.includes(item));
   }
 
   /* Calculate the hex level that corresponds to a map zoom level */
@@ -307,15 +286,15 @@ export class HCMapDataService {
       }
       case 13: {
         // hexLevel = 7; // are 90 hexagons
-        // hexLevel = 8; // are 638 hexagons
-        hexLevel = 9; // are 4471 hexagons
+        hexLevel = 8; // are 638 hexagons
+        // hexLevel = 9; // are 4471 hexagons
         break;
       }
       default: {
-        if (zoom > 19) {
-          hexLevel = 9;
+        if (zoom >= 6) {
+          hexLevel = 8;
         } else {
-          hexLevel = 3;
+          hexLevel = 4;
         }
         break;
       }
