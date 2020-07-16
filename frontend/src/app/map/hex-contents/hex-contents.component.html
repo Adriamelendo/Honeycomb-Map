@@ -1,26 +1,40 @@
-<div
-  *ngIf="hexContents && !hasTowns() && !hasProvinces() && !hasResources()" 
-  [className]="'right-panel second-upper-panel'">
-  <p>No se han encontrado datos en este hexágono.</p>
-</div>
+<ng-container *ngIf="biggerThan680">
+  <div *ngIf="hexContents && !hasTowns() && !hasProvinces() && !hasResources()"
+    [className]="'right-panel second-upper-panel'">
+    <p>No se han encontrado datos en este hexágono.</p>
+  </div>
 
-<div
-  *ngIf="hasResources()" 
-  [className]="resourcesClass()">
-  <app-resources-card [resources]="hexContents.resources">
-  </app-resources-card>
-</div>
+  <div *ngIf="hasResources()" [className]="resourcesClass()">
+    <app-resources-card [resources]="hexContents.resources">
+    </app-resources-card>
+  </div>
 
-<div
-  *ngIf="hasTowns()" 
-  [className]="townsClass()">
-  <app-region-card *ngFor="let town of towns" [region]="town">
-  </app-region-card>
-</div>
+  <div *ngIf="hasTowns()" [className]="townsClass()">
+    <app-region-card *ngFor="let town of towns" [region]="town">
+    </app-region-card>
+  </div>
 
-<div
-  *ngIf="hasProvinces()" 
-  [className]="provincesClass()">
-  <app-region-card *ngFor="let province of provinces" [region]="province">
-  </app-region-card>
-</div>
+  <div *ngIf="hasProvinces()" [className]="provincesClass()">
+    <app-region-card *ngFor="let province of provinces" [region]="province">
+    </app-region-card>
+  </div>
+</ng-container>
+<ng-container *ngIf="!biggerThan680">
+  <div>
+    <ion-content>
+      <ion-slides pager="true" [options]="slideOpts">
+        <ion-slide>
+          <h1>Slide 1</h1>
+        </ion-slide>
+        <ion-slide>
+          <h1>Slide 2</h1>
+        </ion-slide>
+        <ion-slide *ngIf="hasProvinces()" [className]="provincesClass()">
+          <h1>Slide 3</h1>
+          <app-region-card *ngFor="let province of provinces" [region]="province">
+          </app-region-card>
+        </ion-slide>
+      </ion-slides>
+    </ion-content>
+  </div>
+</ng-container>
