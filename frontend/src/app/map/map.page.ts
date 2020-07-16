@@ -110,11 +110,8 @@ export class MapPage {
         }
       }).addTo(this.hexLayer);
 
-      // add click events to show data
+      // add mouseover events to show data
       feature.on({
-        click: (evt) => {
-          this.hexClicked(resource.hex);
-        },
         mouseover: (evt) => {
           this.hexHover(resource.hex);
         }
@@ -137,13 +134,8 @@ export class MapPage {
           }
         }).addTo(this.hexLayer);
 
-        // add click events to show data
+        // add mouseover events to show data
         feature.on({
-          click: (evt) => {
-            const level = this.data.getHexLevel(this.map.getZoom());
-            const hex = h3.geoToH3(evt.latlng.lat, evt.latlng.lng, level);
-            this.hexClicked(hex);
-          },
           mouseover: (evt) => {
             const level = this.data.getHexLevel(this.map.getZoom());
             const hex = h3.geoToH3(evt.latlng.lat, evt.latlng.lng, level);
@@ -195,10 +187,8 @@ export class MapPage {
     this.clickedHex = Leaflet.geoJSON(geo, {
       style: {
         stroke: true,
-        fill: true,
-        fillColor: '#b1393d',
+        fill: false,
         color: '#b1393d',
-        fillOpacity: 0.8,
         opacity: 1,
       }
     }).addTo(this.hexLayer);
@@ -217,6 +207,14 @@ export class MapPage {
         opacity: 1,
       }
     }).addTo(this.hexLayer);
+
+    // add click events to show data
+    this.hoverHex.on({
+      click: (evt) => {
+        this.hexClicked(hex);
+      }
+    });
+
   }
 
   private showSelectHexagon() {
