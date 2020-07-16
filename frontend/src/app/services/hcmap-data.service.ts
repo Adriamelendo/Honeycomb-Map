@@ -23,6 +23,7 @@ export interface HCMapResource {
   description: string;
   category: string;
   hex: string;
+  level: number;
   regionId?: string;
   outline: geojson2h3.GeoJsonObject;   // GeoJSON shape of the containing hex at the given hexLevel
 }
@@ -202,6 +203,7 @@ export class HCMapDataService {
       description: rawResource.description,
       category: rawResource.category,
       hex: rawResource.hex,
+      level: rawResource.level,
       outline: geojson2h3.h3ToFeature(rawResource.hex),
       regionId: rawResource.regionId,
     };

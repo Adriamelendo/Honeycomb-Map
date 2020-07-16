@@ -1,5 +1,5 @@
 <ion-text color="tertiary">
-  <h5>En 1km a la redonda</h5>
+  <h5>En {{ hexSize() }}km a la redonda</h5>
 </ion-text>
 <div class="vertical-scroll">
   <app-resource-item *ngFor="let resource of resources" [resource]="resource">

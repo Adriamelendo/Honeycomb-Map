@@ -63,14 +63,14 @@ function convertProvince(rawProvince, level) {
   };
 }
 
-function convertResource(rawResource) {
+function convertResource(rawResource, level) {
   return {
     id: rawResource.FCid,
     title: rawResource.Title,
     description: rawResource.Description,
     category: rawResource.category,
-    level: 8,
-    hex: h3.geoToH3(rawResource.Location.latitude, rawResource.Location.longitude, 8),
+    level: level,
+    hex: h3.geoToH3(rawResource.Location.latitude, rawResource.Location.longitude, level),
     regionId: rawResource.regionId,
   };
 }
@@ -98,7 +98,11 @@ regions = {
 
 
 rawResources = loadJSON(process.argv[4]).results;
-resources = rawResources.map(convertResource);
+resources = rawResources.map((resource) => convertResource(resource, 4))
+  .concat(rawResources.map((resource) => convertResource(resource, 5)))
+  .concat(rawResources.map((resource) => convertResource(resource, 6)))
+  .concat(rawResources.map((resource) => convertResource(resource, 7)))
+  .concat(rawResources.map((resource) => convertResource(resource, 8)));
 
 writeJSON(process.argv[5], regions);
 writeJSON(process.argv[6], resources);
