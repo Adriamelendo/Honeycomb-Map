@@ -9,7 +9,7 @@ import { Item } from '../interfaces/item';
   styleUrls: ['./view-item.page.scss'],
 })
 export class ViewItemPage implements OnInit {
-  public item: HCMapResource;
+  public resource: HCMapResource;
 
   constructor(
     private data: HCMapDataService,
@@ -18,16 +18,7 @@ export class ViewItemPage implements OnInit {
 
   async ngOnInit() {
     const id = this.activatedRoute.snapshot.paramMap.get('id');
-    this.item = this.data.getResourceOfId(parseInt(id));
-    if(this.item == undefined) {
-      console.log('Item '+id+' is not inside current data, retriving from backend');
-      // this.item = await this.data.getItemByIdFromBackend(id);
-      // if(this.item !== undefined) {
-      //   this.item.read=true;
-      // } else { 
-      //   console.log('Item '+id+' do not exist in backend');
-      // }
-    }
+    this.resource = this.data.getResourceById(parseInt(id));
   }
 
   getBackButtonText() {

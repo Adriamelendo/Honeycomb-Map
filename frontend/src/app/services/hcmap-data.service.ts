@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import * as L from 'leaflet';
 import * as geojson2h3 from 'geojson2h3';
 import * as h3 from 'h3-js';
@@ -39,7 +39,7 @@ export interface HexContents {
 })
 export class HCMapDataService {
 
-  public mapData: BehaviorSubject<MapData> = new BehaviorSubject<MapData>([undefined, undefined]);
+  public mapData: Subject<MapData> = new Subject<MapData>();
 
   private regionsById: Map<string, HCMapRegion>;
   private contentsByHex: Map<string, HexContents>;
@@ -60,13 +60,14 @@ export class HCMapDataService {
 
     this.mapData.next([regions, resources]);
   }
-  public getResourceOfId(id: number): HCMapResource {
-    const current_resources = this.mapData.getValue()[1];
-    if (current_resources) {
-      return current_resources.find(res => res.id === id);
+
+  /* Search one particular resource */
+  public getResourceById(id: number): HCMapResource | undefined {
+    const rawResource = resources.find(r => r.id === id);
+    if (!rawResource) {
+      return undefined;
     } else {
-      // esto no es nada optimo tardara muchisimo
-      return resources.find(res => res.id === id);
+      return this.makeResource(rawResource);
     }
   }
 
@@ -114,28 +115,39 @@ export class HCMapDataService {
       (rawRegion) => this.haveCommonElements(rawRegion.search, searchHexList)
     ).map(
       (rawRegion) => {
-        const viewRegion = (regions[hexLevel] || []).find(
+        const viewRawRegion = (regions[hexLevel] || []).find(
           (r) => (r.id === rawRegion.id)
         );
-        if (!viewRegion) {
+        if (!viewRawRegion) {
           return undefined;
+        } else {
+          const region = this.makeRegion(viewRawRegion);
+          this.indexRegion(viewRawRegion.view, region);
+          return region;
         }
-
-        const region = {
-          id: viewRegion.id,
-          name: viewRegion.name,
-          type: viewRegion.type,
-          boundary: geojson2h3.h3SetToFeature(viewRegion.view),
-          inside: (viewRegion.type === 'town') ?
-            geojson2h3.h3SetToMultiPolygonFeature(viewRegion.view) :
-            undefined,
-          resources: [],
-        }
-
-        this.indexRegion(viewRegion.view, region);
-        return region;
       }
     ).filter((r) => !!r);
+  }
+
+  private makeRegion(rawRegion: any): HCMapRegion {
+    return {
+      id: rawRegion.id,
+      name: rawRegion.name,
+      type: rawRegion.type,
+      boundary: geojson2h3.h3SetToFeature(rawRegion.view),
+      inside: (rawRegion.type === 'town') ?
+        geojson2h3.h3SetToMultiPolygonFeature(rawRegion.view) :
+        undefined,
+      resources: [],
+    }
+  }
+
+  private indexRegion(hexes: string[], region: HCMapRegion) {
+    hexes.forEach((hex) => {
+      this.allocateContents(hex);
+      this.contentsByHex[hex].regions.push(region);
+    });
+    this.regionsById[region.id] = region;
   }
 
   /*
@@ -147,28 +159,23 @@ export class HCMapDataService {
       (rawResource) => rawResource.level === hexLevel
     ).map(
       (rawResource) => {
-        const resource = {
-          id: rawResource.id,
-          title: rawResource.title,
-          description: rawResource.description,
-          category: rawResource.category,
-          hex: rawResource.hex,
-          outline: geojson2h3.h3ToFeature(rawResource.hex),
-          regionId: rawResource.regionId,
-        };
-
+        const resource = this.makeResource(rawResource);
         this.indexResource(rawResource.hex, resource);
         return resource;
       }
     );
   }
 
-  private indexRegion(hexes: string[], region: HCMapRegion) {
-    hexes.forEach((hex) => {
-      this.allocateContents(hex);
-      this.contentsByHex[hex].regions.push(region);
-    });
-    this.regionsById[region.id] = region;
+  private makeResource(rawResource: any): HCMapResource {
+    return {
+      id: rawResource.id,
+      title: rawResource.title,
+      description: rawResource.description,
+      category: rawResource.category,
+      hex: rawResource.hex,
+      outline: geojson2h3.h3ToFeature(rawResource.hex),
+      regionId: rawResource.regionId,
+    };
   }
 
   private indexResource(hex: string, resource: HCMapResource) {

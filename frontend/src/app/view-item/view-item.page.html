@@ -6,27 +6,36 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" *ngIf="item">
-  <ion-item>
-    <ion-icon name="person-circle" color="primary"></ion-icon>
-    <ion-label class="ion-text-wrap">
-      <h2>
-        {{ item.owner }}
-        <span class="date">
-          <ion-note>{{ item.date }}</ion-note>
-        </span>
-      </h2>
-      <h3>Another info: <ion-note>Here</ion-note></h3>
-    </ion-label>
-  </ion-item>
-  
+<ion-content [fullscreen]="true" *ngIf="resource">
+  <!-- <ion&#45;item> -->
+  <!--   <ion&#45;icon name="person&#45;circle" color="primary"></ion&#45;icon> -->
+  <!--   <ion&#45;label class="ion&#45;text&#45;wrap"> -->
+  <!--     <h2> -->
+  <!--       {{ resource.owner }} -->
+  <!--       <span class="date"> -->
+  <!--         <ion&#45;note>{{ resource.date }}</ion&#45;note> -->
+  <!--       </span> -->
+  <!--     </h2> -->
+  <!--     <h3>Another info: <ion&#45;note>Here</ion&#45;note></h3> -->
+  <!--   </ion&#45;label> -->
+  <!-- </ion&#45;item> -->
+
   <div class="ion-padding">
-    <h1>{{ item.title }}</h1>
+    <h1>{{ resource.title }}</h1>
     <p>
-      {{ item.description }}
+      {{ resource.description }}
     </p>
     <p>
       Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </p>
+  </div>
+</ion-content>
+
+<ion-content [fullscreen]="true" *ngIf="!resource">
+  <div class="ion-padding">
+    <h1>No se encuentra el recurso</h1>
+    <p>
+      El recurso buscado no existe, vuelve atrás por favor y busca otra vez.
     </p>
   </div>
 </ion-content>
