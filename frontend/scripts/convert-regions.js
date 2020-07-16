@@ -1,5 +1,6 @@
 const fs = require('fs');
 const h3 = require('h3-js');
+const geojson2h3 = require('geojson2h3');
 
 rawTowns = loadJSON(process.argv[2]).records;
 rawProvinces = loadJSON(process.argv[3]).records;
@@ -39,6 +40,12 @@ function writeJSON(path, data) {
 function convertTown(level) {
   return (rawTown) => {
     counter.advance();
+
+    const hexes = getHexes(rawTown.fields.geo_shape, level);
+    const container = getContainer(rawTown.fields.geo_shape);
+    const boundary = geojson2h3.h3SetToFeature(hexes);
+    const inside = geojson2h3.h3SetToMultiPolygonFeature(hexes);
+
     return {
       id: rawTown.recordid,
       name: rawTown.fields.municipio,
@@ -46,8 +53,10 @@ function convertTown(level) {
       // province: rawTown.fields.provincia,
       // state: rawTown.fields.communidad_autonoma,
       level: level,
-      hexes: getHexes(rawTown.fields.geo_shape, level),
-      container: getContainer(rawTown.fields.geo_shape),
+      hexes: hexes,
+      container: container,
+      boundary: boundary,
+      inside: inside,
     }
   };
 }
@@ -55,13 +64,22 @@ function convertTown(level) {
 function convertProvince(level) {
   return (rawProvince) => {
     counter.advance();
+
+    console.log(rawProvince);
+    const hexes = getHexes(rawProvince.fields.geo_shape, level);
+    const container = getContainer(rawProvince.fields.geo_shape);
+    const boundary = geojson2h3.h3SetToFeature(hexes);
+    const inside = undefined;
+
     return {
       id: rawProvince.recordid,
       name: rawProvince.fields.nameunit,
       type: 'province',
       level: level,
-      hexes: getHexes(rawProvince.fields.geo_shape, level),
-      container: getContainer(rawProvince.fields.geo_shape),
+      hexes: hexes,
+      container: container,
+      boundary: boundary,
+      inside: inside,
     }
   };
 }
@@ -69,8 +87,11 @@ function convertProvince(level) {
 function convertResource(level) {
   return (rawResource) => {
     counter.advance();
+
     const hex = h3.geoToH3(rawResource.Location.latitude, rawResource.Location.longitude, level);
     const center = h3.h3ToGeo(hex);
+    const outline = geojson2h3.h3ToFeature(hex);
+
     return {
       id: rawResource.FCid,
       title: rawResource.Title,
@@ -82,6 +103,7 @@ function convertResource(level) {
         lat: center[0],
         lng: center[1],
       },
+      outline: outline,
       regionId: rawResource.regionId,
     }
   };
@@ -134,12 +156,13 @@ function getHexes(geo_shape, level) {
 
 function advanceCounter(title, total) {
   var counter = 0;
+  process.stdout.write(title + ': 0%');
 
   return {
     advance: function () {
       counter += 1;
       percent = Math.round(counter / total * 100);
-      process.stdout.write(title + ': ' + percent + '%\033[0G');
+      process.stdout.write('\033[0G' + title + ': ' + percent + '%');
     },
 
     end: function () {

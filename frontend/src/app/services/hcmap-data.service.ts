@@ -141,10 +141,8 @@ export class HCMapDataService {
       id: rawRegion.id,
       name: rawRegion.name,
       type: rawRegion.type,
-      boundary: geojson2h3.h3SetToFeature(rawRegion.hexes),
-      inside: (rawRegion.type === 'town') ?
-        geojson2h3.h3SetToMultiPolygonFeature(rawRegion.hexes) :
-        undefined,
+      boundary: rawRegion.boundary,
+      inside: rawRegion.inside,
       resources: [],
     }
   }
@@ -202,7 +200,7 @@ export class HCMapDataService {
       category: rawResource.category,
       hex: rawResource.hex,
       level: rawResource.level,
-      outline: geojson2h3.h3ToFeature(rawResource.hex),
+      outline: rawResource.outline,
       regionId: rawResource.regionId,
     };
   }
