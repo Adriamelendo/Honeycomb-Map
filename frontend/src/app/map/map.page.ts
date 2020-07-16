@@ -10,6 +10,7 @@ import { Item } from '../interfaces/item';
 
 import * as Leaflet from 'leaflet';
 import * as h3 from 'h3-js';
+import * as geojson2h3 from 'geojson2h3';
 
 @Component({
   selector: 'app-map',
@@ -20,6 +21,8 @@ export class MapPage {
   private map: Leaflet.Map;
 
   private hexLayer = new Leaflet.LayerGroup();
+  private clickedHex = new Leaflet.LayerGroup();
+  private hoverHex = new Leaflet.LayerGroup();
   private hexLocked: string;
   private searchText = '';
   private currentCategory = '';
@@ -97,7 +100,6 @@ export class MapPage {
   }
 
   private drawResources(resources: HCMapResource[]) {
-    let hoverHex = new Leaflet.LayerGroup();
     resources.forEach(resource => {
       const feature = Leaflet.geoJSON(resource.outline, {
         style: {
@@ -112,17 +114,9 @@ export class MapPage {
       feature.on({
         click: (evt) => {
           this.hexClicked(resource.hex);
-          hoverHex.clearLayers();
-          hoverHex = Leaflet.geoJSON(resource.outline, {
-            style: {
-              stroke: true,
-              fill: true,
-              fillColor: '#b1393d',
-              color: '#b1393d',
-              fillOpacity: 0.8,
-              opacity: 1,
-            }
-          }).addTo(this.hexLayer);
+        },
+        mouseover: (evt) => {
+          this.hexHover(resource.hex);
         }
       });
     });
@@ -149,6 +143,11 @@ export class MapPage {
             const level = this.data.getHexLevel(this.map.getZoom());
             const hex = h3.geoToH3(evt.latlng.lat, evt.latlng.lng, level);
             this.hexClicked(hex);
+          },
+          mouseover: (evt) => {
+            const level = this.data.getHexLevel(this.map.getZoom());
+            const hex = h3.geoToH3(evt.latlng.lat, evt.latlng.lng, level);
+            this.hexHover(hex);
           }
         });
 
@@ -190,6 +189,34 @@ export class MapPage {
       this.hexLocked = '';
       this.hideSelectHexagon();
     }
+
+    const geo = geojson2h3.h3ToFeature(hex);
+    this.clickedHex.clearLayers();
+    this.clickedHex = Leaflet.geoJSON(geo, {
+      style: {
+        stroke: true,
+        fill: true,
+        fillColor: '#b1393d',
+        color: '#b1393d',
+        fillOpacity: 0.8,
+        opacity: 1,
+      }
+    }).addTo(this.hexLayer);
+  }
+
+  private hexHover(hex) {
+    const geo = geojson2h3.h3ToFeature(hex);
+    this.hoverHex.clearLayers();
+    this.hoverHex = Leaflet.geoJSON(geo, {
+      style: {
+        stroke: true,
+        fill: true,
+        fillColor: '#b1393d',
+        color: '#b1393d',
+        fillOpacity: 0.8,
+        opacity: 1,
+      }
+    }).addTo(this.hexLayer);
   }
 
   private showSelectHexagon() {
