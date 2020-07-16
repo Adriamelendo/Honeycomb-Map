@@ -97,6 +97,7 @@ export class MapPage {
   }
 
   private drawResources(resources: HCMapResource[]) {
+    let hoverHex = new Leaflet.LayerGroup();
     resources.forEach(resource => {
       const feature = Leaflet.geoJSON(resource.outline, {
         style: {
@@ -111,6 +112,17 @@ export class MapPage {
       feature.on({
         click: (evt) => {
           this.hexClicked(resource.hex);
+          hoverHex.clearLayers();
+          hoverHex = Leaflet.geoJSON(resource.outline, {
+            style: {
+              stroke: true,
+              fill: true,
+              fillColor: '#b1393d',
+              color: '#b1393d',
+              fillOpacity: 0.8,
+              opacity: 1,
+            }
+          }).addTo(this.hexLayer);
         }
       });
     });
