@@ -20,20 +20,25 @@
   </div>
 </ng-container>
 <ng-container *ngIf="!biggerThan680">
-  <div>
+  <div [className]="'right-panel open-panel'">
     <ion-content>
       <ion-slides pager="true" [options]="slideOpts">
-        <ion-slide>
-          <h1>Slide 1</h1>
+
+        <ion-slide *ngIf="hasResources()">          
+          <app-resources-card [resources]="hexContents.resources">
+          </app-resources-card>
         </ion-slide>
-        <ion-slide>
-          <h1>Slide 2</h1>
+
+        <ion-slide *ngIf="hasTowns()">         
+          <app-region-card *ngFor="let town of towns" [region]="town">
+          </app-region-card>
         </ion-slide>
-        <ion-slide *ngIf="hasProvinces()" [className]="provincesClass()">
-          <h1>Slide 3</h1>
+
+        <ion-slide *ngIf="hasProvinces()" >          
           <app-region-card *ngFor="let province of provinces" [region]="province">
           </app-region-card>
         </ion-slide>
+        
       </ion-slides>
     </ion-content>
   </div>
