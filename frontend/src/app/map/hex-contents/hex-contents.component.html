@@ -21,7 +21,7 @@
 </ng-container>
 <ng-container *ngIf="!biggerThan680">
   <div [className]="'right-panel open-panel'">
-    <ion-content>
+    
       <ion-slides pager="true" [options]="slideOpts">
 
         <ion-slide *ngIf="hasResources()">          
@@ -40,6 +40,6 @@
         </ion-slide>
         
       </ion-slides>
-    </ion-content>
+    
   </div>
 </ng-container>

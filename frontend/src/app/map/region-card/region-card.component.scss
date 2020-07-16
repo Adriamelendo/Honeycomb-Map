@@ -16,14 +16,18 @@ h5 {
 .province {
   color: #fd8d3c;
 }
+.vertical-scroll{
+  overflow-y: auto;
 
-@media (min-width: 680px) {  
+  height:50vw;
+}
+ @media (min-width: 680px) {  
     .vertical-scroll{
       overflow-y: auto;
 
       height:100%
     }
-  
+  }  
     .vertical-scroll::-webkit-scrollbar {
       -webkit-appearance: none;
     }
@@ -51,5 +55,5 @@ h5 {
       background-color: #fff;
       border-radius: 8px;
     }
-  }
+  
   

@@ -11,12 +11,16 @@ h5 {
   font-weight: 600;
   color: #756bb1;
 }
+.vertical-scroll{
+  overflow-y: auto;
+  height: 50vw;
+}
 @media (min-width: 680px) {  
     .vertical-scroll{
       overflow-y: auto;
       height: 100%;
     }
-  
+  }  
     .vertical-scroll::-webkit-scrollbar {
       -webkit-appearance: none;
     }
@@ -44,5 +48,5 @@ h5 {
       background-color: #fff;
       border-radius: 8px;
     }
-  }
+ 
   
