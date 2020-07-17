@@ -41,12 +41,12 @@ export interface HexContents {
 })
 export class HCMapDataService {
 
-  public mapData: Subject<MapData> = new Subject<MapData>();
+  public mapData$: Subject<MapData> = new Subject<MapData>();
 
   private regionsById: Map<string, HCMapRegion>;
   private contentsByHex: Map<string, HexContents>;
 
-  /* Recalculate all mapData in the new viewport */
+  /* Recalculate all map data in the new viewport */
   public setViewport(
     bounds: L.LatLngBounds,
     zoom: number,
@@ -67,7 +67,7 @@ export class HCMapDataService {
     const regions = this.getRegions(extBounds, hexLevel);
     const resources = this.getResources(extBounds, hexLevel, category, searchText);
 
-    this.mapData.next([regions, resources]);
+    this.mapData$.next([regions, resources]);
   }
 
   /* Search one particular resource */
