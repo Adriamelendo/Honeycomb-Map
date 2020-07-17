@@ -29,6 +29,15 @@ export class MapPage {
   private hexContents: HexContents;
   private currentHexLevel: number;
   disableHover:boolean=false;
+  markerIcon = {
+    icon: Leaflet.icon({
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+      popupAnchor: [0, 0],
+      // specify the path here
+      iconUrl: "assets/cross.png", 
+    })
+  };
 
   appMapClass: string = 'show-header';
   @HostBinding('class') get Class() {
@@ -68,6 +77,7 @@ export class MapPage {
     }).addTo(this.map);
     this.currentHexLevel = this.data.getHexLevel(this.map.getZoom())
     this.hexLayer.addTo(this.map);
+    this.clickedHex.addTo(this.map);
 
     this.data.mapData.subscribe(
       // TODO: unsubscribe on component destroy
@@ -86,6 +96,7 @@ export class MapPage {
     // recalculate render on drag and zoom
     this.map.on('dragend', (e: Leaflet.LeafletMouseEvent) => {
       this.calculateData();
+      this.clickedHex.setZIndex(100);
     });
     this.map.on('zoomend', (e: Leaflet.LeafletMouseEvent) => {
       const nextLevel = this.data.getHexLevel(this.map.getZoom());
@@ -195,14 +206,19 @@ export class MapPage {
       this.centerMapOnHex(hex);
       this.showSelectHexagon();
       const geo = geojson2h3.h3ToFeature(hex);
-      this.clickedHex = Leaflet.geoJSON(geo, {
-        style: {
-          stroke: true,
-          fill: false,
-          color: '#b1393d',
-          opacity: 1,
-        }
-      }).addTo(this.map);
+
+
+      Leaflet.marker(h3.h3ToGeo(hex) as Leaflet.LatLngExpression, this.markerIcon).addTo(this.clickedHex);           
+
+      // this.clickedHex = Leaflet.geoJSON(geo, {
+      //   style: {
+      //     stroke: true,
+      //     fill: false,
+      //     color: '#b1393d',
+      //     opacity: 1,
+      //   }
+      // }).addTo(this.map);
+      // this.clickedHex.setZIndex(100);
     }
     else {
       this.hexContents = undefined;
