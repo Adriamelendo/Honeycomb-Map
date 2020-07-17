@@ -28,6 +28,7 @@ export class MapPage {
   private currentCategory = '';
   private hexContents: HexContents;
   private currentHexLevel: number;
+  disableHover:boolean=false;
 
   appMapClass: string = 'show-header';
   @HostBinding('class') get Class() {
@@ -88,7 +89,7 @@ export class MapPage {
     });
     this.map.on('zoomend', (e: Leaflet.LeafletMouseEvent) => {
       const nextLevel = this.data.getHexLevel(this.map.getZoom());
-      if (nextLevel != this.currentHexLevel) {
+      if (nextLevel !== this.currentHexLevel) {
         this.currentHexLevel = nextLevel;
         this.hexContents = undefined;
         this.hexLocked = '';
@@ -121,7 +122,9 @@ export class MapPage {
       // add mouseover events to show data
       feature.on({
         mouseover: (evt) => {
-          this.hexHover(resource.hex);
+          if (!this.disableHover) {
+            this.hexHover(resource.hex);
+          }
         }, click: (evt) => {
           this.hexClicked(resource.hex);
         }
@@ -147,9 +150,11 @@ export class MapPage {
         // add mouseover events to show data
         feature.on({
           mouseover: (evt) => {
-            const level = this.data.getHexLevel(this.map.getZoom());
-            const hex = h3.geoToH3(evt.latlng.lat, evt.latlng.lng, level);
-            this.hexHover(hex);
+            if (!this.disableHover) {
+              const level = this.data.getHexLevel(this.map.getZoom());
+              const hex = h3.geoToH3(evt.latlng.lat, evt.latlng.lng, level);
+              this.hexHover(hex);
+            }
           }, click: (evt) => {
             const level = this.data.getHexLevel(this.map.getZoom());
             const hex = h3.geoToH3(evt.latlng.lat, evt.latlng.lng, level);
@@ -203,6 +208,7 @@ export class MapPage {
       this.hexContents = undefined;
       this.hexLocked = '';
       this.hideSelectHexagon();
+      this.disableHover = false;
     }
   }
 
@@ -221,6 +227,8 @@ export class MapPage {
     }).addTo(this.map);
     this.hoverHex.on({
       click: (evt) => {
+        this.disableHover = true;
+        this.hoverHex.clearLayers();
         this.hexClicked(hex);
       }
     });
