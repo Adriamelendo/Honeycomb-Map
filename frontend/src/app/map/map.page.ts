@@ -95,6 +95,7 @@ export class MapPage implements OnDestroy {
     this.map.on('dragend', (e: Leaflet.LeafletMouseEvent) => {
       this.calculateData();
     });
+
     this.map.on('zoomend', (e: Leaflet.LeafletMouseEvent) => {
       const nextLevel = this.data.getHexLevel(this.map.getZoom());
       if (nextLevel !== this.currentHexLevel) {
@@ -111,7 +112,7 @@ export class MapPage implements OnDestroy {
   }
 
   private calculateData() {
-    this.data.setViewport(
+    this.data.setViewportAndFilter(
       this.map.getBounds(),
       this.map.getZoom(),
       this.currentCategory,
