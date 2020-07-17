@@ -82,15 +82,18 @@ export class MapPage {
     this.calculateData();
 
     // recalculate render on drag and zoom
-    this.map.on('zoomend dragend', (e: Leaflet.LeafletMouseEvent) => {
+    this.map.on('dragend', (e: Leaflet.LeafletMouseEvent) => {
+      this.calculateData();
+    });
+    this.map.on('zoomend', (e: Leaflet.LeafletMouseEvent) => {
+      this.hexContents = undefined;
+      this.hexLocked = '';
+      this.hideSelectHexagon();
       this.calculateData();
     });
   }
 
-  private calculateData() {
-    this.hexContents = undefined;
-    this.hexLocked = '';
-    this.hideSelectHexagon();
+  private calculateData() {    
     this.data.setViewport(
       this.map.getBounds(),
       this.map.getZoom(),
@@ -176,28 +179,26 @@ export class MapPage {
 
   private hexClicked(hex) {
     this.hexContents = this.data.getContentsAtHex(hex);
-
+    this.clickedHex.clearLayers();
     if (this.hexLocked !== hex) {
       this.hexLocked = hex;
       this.centerMapOnHex(hex);
       this.showSelectHexagon();
+      const geo = geojson2h3.h3ToFeature(hex);
+      this.clickedHex = Leaflet.geoJSON(geo, {
+        style: {
+          stroke: true,
+          fill: false,
+          color: '#b1393d',
+          opacity: 1,
+        }
+      }).addTo(this.map);
     }
     else {
       this.hexContents = undefined;
       this.hexLocked = '';
       this.hideSelectHexagon();
     }
-
-    const geo = geojson2h3.h3ToFeature(hex);
-    this.clickedHex.clearLayers();
-    this.clickedHex = Leaflet.geoJSON(geo, {
-      style: {
-        stroke: true,
-        fill: false,
-        color: '#b1393d',
-        opacity: 1,
-      }
-    }).addTo(this.hexLayer);
   }
 
   private hexHover(hex) {
@@ -212,7 +213,7 @@ export class MapPage {
         fillOpacity: 0.8,
         opacity: 1,
       }
-    }).addTo(this.hexLayer);
+    }).addTo(this.map);
   }
 
   private centerMapOnHex(hex: string) {
