@@ -26,3 +26,10 @@
 @import "~@ionic/angular/css/flex-utils.css";
 
 @import "~leaflet/dist/leaflet.css";
+
+.show-header .mobile-panel {
+    transform: translateY(0);
+  }
+  .hide-header .mobile-panel {
+    transform: translateY(-30vh);
+  }

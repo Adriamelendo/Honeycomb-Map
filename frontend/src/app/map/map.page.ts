@@ -183,6 +183,7 @@ export class MapPage {
 
     if (this.hexLocked !== hex) {
       this.hexLocked = hex;
+      this.centerMapOnHex(hex);
       this.showSelectHexagon();
     }
     else {
@@ -192,11 +193,17 @@ export class MapPage {
     }
   }
 
+  private centerMapOnHex(hex: string){
+    // current center if we want to save
+    //this.bigLatLng = this.map.getCenter();
+    //this.map.flyTo(h3.h3ToGeo(hex) as Leaflet.LatLngExpression, this.map.getZoom(), { animate: true, duration: 0.8 });
+  }
+
   private showSelectHexagon() {
-    this.appMapClass = 'show-header';
+    this.appMapClass = 'hide-header';        
   }
 
   private hideSelectHexagon() {
-    this.appMapClass = 'hide-header';
+    this.appMapClass = 'show-header';
   }
 }

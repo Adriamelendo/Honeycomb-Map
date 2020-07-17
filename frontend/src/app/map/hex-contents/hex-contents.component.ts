@@ -1,7 +1,8 @@
-import { Component, OnChanges, OnInit, Input, HostListener } from '@angular/core';
+import { Component, OnChanges, OnInit, Input, HostListener, ViewChild } from '@angular/core';
 import { HexContents, HCMapRegion, HCMapResource } from '../../services/hcmap-data.service';
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
-import { Platform } from '@ionic/angular';
+import { IonSlides, Platform } from '@ionic/angular';
+
 
 
 @Component({
@@ -18,6 +19,7 @@ export class HexContentsComponent implements OnChanges, OnInit {
   public resources: HCMapResource[];
 
   biggerThan680: boolean = false;
+  lower680Class:string = 'right-panel mobile-panel';
 
   slideOpts = {
     initialSlide: 1,
@@ -33,6 +35,13 @@ export class HexContentsComponent implements OnChanges, OnInit {
     } else {
       this.biggerThan680 = false;
     }
+  }
+  @ViewChild(IonSlides) slides: IonSlides;
+  slidePrev() {
+    this.slides.slidePrev();
+  }
+  slideNext() {
+    this.slides.slideNext();
   }
 
   @HostListener('window:resize', ['$event'])onResize(event) {

@@ -9,7 +9,6 @@
   z-index:1000;     
   overflow-y: hidden; 
   transition: transform 1.3s;  
-  transform: translateY(0);
 
   padding: 10px 10px 0 10px;
   width: 100vw;
@@ -24,12 +23,8 @@
   height: 80vh; //50 of show header + 30 of open panel
 }
 
-.close-panel {
-  transform: translateY(0);
-}
-
-.open-panel {
-  transform: translateY(-30vh);    
+ion-slides {
+  height: 100%;
 }
 
 @media (min-width: 680px) {
@@ -76,13 +71,5 @@
     bottom: 20px;
     left: auto;
     right: 1vw;
-  }
-
-  .close-panel {
-    transform: translateX(0);
-  }
-
-  .open-panel {
-    transform: translateX(0); //-10vw to bring closer to map center    
-  }
+  } 
 }

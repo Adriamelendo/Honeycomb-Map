@@ -1,6 +1,7 @@
 :host {
-    overflow-y: auto;
-    height:100%
+    overflow-y: hidden;
+    height:100%;
+    width:100%;
 }
 h5 {
   margin-top: 0px;
@@ -13,7 +14,7 @@ h5 {
 }
 .vertical-scroll{
   overflow-y: auto;
-  height: 50vw;
+  height: 100%;
 }
 @media (min-width: 680px) {  
     .vertical-scroll{

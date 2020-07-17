@@ -20,26 +20,38 @@
   </div>
 </ng-container>
 <ng-container *ngIf="!biggerThan680">
-  <div [className]="'right-panel open-panel'">
-    
-      <ion-slides pager="true" [options]="slideOpts">
 
-        <ion-slide *ngIf="hasResources()">          
-          <app-resources-card [resources]="hexContents.resources">
-          </app-resources-card>
-        </ion-slide>
+  <div [(className)]="lower680Class">
 
-        <ion-slide *ngIf="hasTowns()">         
-          <app-region-card *ngFor="let town of towns" [region]="town">
-          </app-region-card>
-        </ion-slide>
+    <div style="position: absolute;top: 50%;left: 16px;font-size: 25px;z-index: 2;" (click)="slidePrev()">
+      <ion-icon name="arrow-back"></ion-icon>
+    </div>
+    <div style="position: absolute;top: 50%;right: 16px;font-size: 25px;z-index: 2;" (click)="slideNext()">
+      <ion-icon name="arrow-forward"></ion-icon>
+    </div>
 
-        <ion-slide *ngIf="hasProvinces()" >          
-          <app-region-card *ngFor="let province of provinces" [region]="province">
-          </app-region-card>
-        </ion-slide>
-        
-      </ion-slides>
-    
+    <ion-slides pager="false" [options]="slideOpts">
+
+      <ion-slide *ngIf="hexContents && !hasTowns() && !hasProvinces() && !hasResources()">
+        <p>No se han encontrado datos en este hexágono.</p>
+      </ion-slide>
+
+      <ion-slide *ngIf="hasResources()">
+        <app-resources-card [resources]="hexContents.resources">
+        </app-resources-card>
+      </ion-slide>
+
+      <ion-slide *ngIf="hasTowns()">
+        <app-region-card *ngFor="let town of towns" [region]="town">
+        </app-region-card>
+      </ion-slide>
+
+      <ion-slide *ngIf="hasProvinces()">
+        <app-region-card *ngFor="let province of provinces" [region]="province">
+        </app-region-card>
+      </ion-slide>
+
+    </ion-slides>
+
   </div>
 </ng-container>
