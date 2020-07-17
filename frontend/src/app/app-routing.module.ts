@@ -3,7 +3,7 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
-    path: 'map',
+    path: '',
     loadChildren: () => import('./map/map.module').then( m => m.MapPageModule)
   },
   {
@@ -19,8 +19,8 @@ const routes: Routes = [
     loadChildren: () => import('./auth/sign-in/sign-in.module').then( m => m.SignInPageModule)
   },  
   {
-    path: '',
-    redirectTo: 'map',
+    path: 'map',
+    redirectTo: '',
     pathMatch: 'full'
   },
 ];
