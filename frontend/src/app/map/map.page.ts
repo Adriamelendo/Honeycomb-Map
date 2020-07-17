@@ -1,4 +1,6 @@
-import { Component, HostBinding } from '@angular/core';
+import { Component, HostBinding, OnDestroy } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { DataService } from '../services/data.service';
 import {
   HCMapDataService,
@@ -17,8 +19,9 @@ import * as geojson2h3 from 'geojson2h3';
   templateUrl: './map.page.html',
   styleUrls: ['./map.page.scss'],
 })
-export class MapPage {
+export class MapPage implements OnDestroy {
   private map: Leaflet.Map;
+  private unsubscribe$ = new Subject<void>();
 
   private hexLayer = new Leaflet.LayerGroup();
   private clickedHex = new Leaflet.LayerGroup();
@@ -36,6 +39,10 @@ export class MapPage {
   }
 
   constructor(private data: HCMapDataService) { }
+
+  ngOnDestroy() {
+    this.unsubscribe$.next();
+  }
 
   ionViewDidEnter() {
     this.addMap();
@@ -69,16 +76,17 @@ export class MapPage {
     this.currentHexLevel = this.data.getHexLevel(this.map.getZoom())
     this.hexLayer.addTo(this.map);
 
-    this.data.mapData.subscribe(
-      // TODO: unsubscribe on component destroy
-      ([regions, resources]) => {
-        if (regions && resources) {
-          this.hexLayer.clearLayers();
-          this.drawRegions(regions);
-          this.drawResources(resources);
+    this.data.mapData$
+      .pipe(takeUntil(this.unsubscribe$))
+      .subscribe(
+        ([regions, resources]) => {
+          if (regions && resources) {
+            this.hexLayer.clearLayers();
+            this.drawRegions(regions);
+            this.drawResources(resources);
+          }
         }
-      }
-    );
+      );
 
     // first render
     this.calculateData();
