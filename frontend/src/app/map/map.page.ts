@@ -27,6 +27,7 @@ export class MapPage {
   private searchText = '';
   private currentCategory = '';
   private hexContents: HexContents;
+  private currentHexLevel: number;
 
   appMapClass: string = 'show-header';
   @HostBinding('class') get Class() {
@@ -64,7 +65,7 @@ export class MapPage {
     Leaflet.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
       attribution: ''
     }).addTo(this.map);
-
+    this.currentHexLevel = this.data.getHexLevel(this.map.getZoom())
     this.hexLayer.addTo(this.map);
 
     this.data.mapData.subscribe(
@@ -86,14 +87,18 @@ export class MapPage {
       this.calculateData();
     });
     this.map.on('zoomend', (e: Leaflet.LeafletMouseEvent) => {
-      this.hexContents = undefined;
-      this.hexLocked = '';
-      this.hideSelectHexagon();
+      const nextLevel = this.data.getHexLevel(this.map.getZoom());
+      if (nextLevel != this.currentHexLevel) {
+        this.currentHexLevel = nextLevel;
+        this.hexContents = undefined;
+        this.hexLocked = '';
+        this.hideSelectHexagon();
+      }
       this.calculateData();
     });
   }
 
-  private calculateData() {    
+  private calculateData() {
     this.data.setViewport(
       this.map.getBounds(),
       this.map.getZoom(),
@@ -214,12 +219,17 @@ export class MapPage {
         opacity: 1,
       }
     }).addTo(this.map);
+    this.hoverHex.on({
+      click: (evt) => {
+        this.hexClicked(hex);
+      }
+    });
   }
 
   private centerMapOnHex(hex: string) {
     // current center if we want to save
     //this.bigLatLng = this.map.getCenter();
-    //this.map.flyTo(h3.h3ToGeo(hex) as Leaflet.LatLngExpression, this.map.getZoom(), { animate: true, duration: 0.8 });
+    this.map.flyTo(h3.h3ToGeo(hex) as Leaflet.LatLngExpression, this.map.getZoom(), { animate: true, duration: 0.8 });
   }
 
   private showSelectHexagon() {

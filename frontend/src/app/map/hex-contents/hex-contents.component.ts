@@ -81,7 +81,7 @@ export class HexContentsComponent implements OnChanges, OnInit {
       );
       this.resources = this.hexContents.resources;
 
-      this.slides.slideTo(0);
+      if( this.slides) this.slides.slideTo(0);
       this.showPrev = false;
       this.showNext = false;
       let count = 0;
