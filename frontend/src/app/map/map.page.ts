@@ -32,7 +32,7 @@ export class MapPage implements OnDestroy {
   private hexContents: HexContents;
   private currentHexLevel: number;
   disableHover:boolean=false;
-
+  
   appMapClass: string = 'show-header';
   @HostBinding('class') get Class() {
     return this.appMapClass;
@@ -75,6 +75,8 @@ export class MapPage implements OnDestroy {
     }).addTo(this.map);
     this.currentHexLevel = this.data.getHexLevel(this.map.getZoom())
     this.hexLayer.addTo(this.map);
+
+    this.map.createPane("selectedPane").style.zIndex = '450';
 
     this.data.mapData$
       .pipe(takeUntil(this.unsubscribe$))
@@ -211,7 +213,7 @@ export class MapPage implements OnDestroy {
           fill: false,
           color: '#b1393d',
           opacity: 1,
-        }
+        }, pane: "selectedPane"
       }).addTo(this.map);
       this.centerMapOnHex(hex);
     }
