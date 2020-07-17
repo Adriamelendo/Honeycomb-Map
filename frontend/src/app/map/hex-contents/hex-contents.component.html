@@ -23,17 +23,17 @@
 
   <div [(className)]="lower680Class">
 
-    <div style="position: absolute;top: 50%;left: 16px;font-size: 25px;z-index: 2;" (click)="slidePrev()">
+    <div *ngIf="showPrev" style="position: absolute;top: 50%;left: 16px;font-size: 25px;z-index: 2;" (click)="slidePrev()">
       <ion-icon name="arrow-back"></ion-icon>
     </div>
-    <div style="position: absolute;top: 50%;right: 16px;font-size: 25px;z-index: 2;" (click)="slideNext()">
+    <div *ngIf="showNext" style="position: absolute;top: 50%;right: 16px;font-size: 25px;z-index: 2;" (click)="slideNext()">
       <ion-icon name="arrow-forward"></ion-icon>
     </div>
 
-    <ion-slides pager="false" [options]="slideOpts">
+    <ion-slides pager="false" (ionSlideWillChange)="calculateArrows()" [options]="slideOpts">
 
       <ion-slide *ngIf="hexContents && !hasTowns() && !hasProvinces() && !hasResources()">
-        <p>No se han encontrado datos en este hexágono.</p>
+        <div style="height:100%;">No se han encontrado datos en este hexágono.</div>
       </ion-slide>
 
       <ion-slide *ngIf="hasResources()">

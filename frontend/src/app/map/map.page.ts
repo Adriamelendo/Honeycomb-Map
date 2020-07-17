@@ -114,6 +114,8 @@ export class MapPage {
       feature.on({
         mouseover: (evt) => {
           this.hexHover(resource.hex);
+        }, click: (evt) => {
+          this.hexClicked(resource.hex);
         }
       });
     });
@@ -140,9 +142,12 @@ export class MapPage {
             const level = this.data.getHexLevel(this.map.getZoom());
             const hex = h3.geoToH3(evt.latlng.lat, evt.latlng.lng, level);
             this.hexHover(hex);
+          }, click: (evt) => {
+            const level = this.data.getHexLevel(this.map.getZoom());
+            const hex = h3.geoToH3(evt.latlng.lat, evt.latlng.lng, level);
+            this.hexClicked(hex);
           }
         });
-
       } else if (region.type === 'town') {
         Leaflet.geoJSON(region.boundary, {
           style: {
@@ -208,24 +213,16 @@ export class MapPage {
         opacity: 1,
       }
     }).addTo(this.hexLayer);
-
-    // add click events to show data
-    this.hoverHex.on({
-      click: (evt) => {
-        this.hexClicked(hex);
-      }
-    });
-
   }
 
-  private centerMapOnHex(hex: string){
+  private centerMapOnHex(hex: string) {
     // current center if we want to save
     //this.bigLatLng = this.map.getCenter();
     //this.map.flyTo(h3.h3ToGeo(hex) as Leaflet.LatLngExpression, this.map.getZoom(), { animate: true, duration: 0.8 });
   }
 
   private showSelectHexagon() {
-    this.appMapClass = 'hide-header';        
+    this.appMapClass = 'hide-header';
   }
 
   private hideSelectHexagon() {

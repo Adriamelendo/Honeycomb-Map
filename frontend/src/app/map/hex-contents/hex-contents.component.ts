@@ -21,8 +21,11 @@ export class HexContentsComponent implements OnChanges, OnInit {
   biggerThan680: boolean = false;
   lower680Class:string = 'right-panel mobile-panel';
 
+  showNext:boolean = false;
+  showPrev:boolean = false;
+
   slideOpts = {
-    initialSlide: 1,
+    initialSlide: 0,
     speed: 400
   };
 
@@ -34,8 +37,8 @@ export class HexContentsComponent implements OnChanges, OnInit {
       this.biggerThan680 = true;
     } else {
       this.biggerThan680 = false;
-    }
-  }
+    }    
+  }  
   @ViewChild(IonSlides) slides: IonSlides;
   slidePrev() {
     this.slides.slidePrev();
@@ -53,9 +56,20 @@ export class HexContentsComponent implements OnChanges, OnInit {
     }
   }
 
+
+  calculateArrows() {  
+    console.log('calculating arrows')  
+    this.slides.isEnd().then(isEnd => {
+      this.showNext = !isEnd;
+    });
+    this.slides.isBeginning().then(isBeginning => {
+      this.showPrev = !isBeginning;
+    });
+  }
+
   ngOnChanges() {
     console.log('HexContents');
-
+    
     if (this.hexContents) {
       this.towns = this.hexContents.regions.filter(
         (region) => (region.type === 'town' &&
@@ -66,15 +80,29 @@ export class HexContentsComponent implements OnChanges, OnInit {
           region.resources.length > 0)
       );
       this.resources = this.hexContents.resources;
+
+      this.slides.slideTo(0);
+      this.showPrev = false;
+      this.showNext = false;
+      let count = 0;
+      if(this.hasResources()) count++;
+      if(this.hasTowns()) count++;
+      if(this.hasProvinces()) count++;
+      if(count>1) this.showNext = true;
+      
+      
     } else {
       this.towns = [];
       this.provinces = [];
       this.resources = [];
+      this.showNext = false;
+      this.showPrev = false;
     }
 
     console.log('towns:', this.towns);
     console.log('provinces:', this.towns);
     console.log('resources:', this.resources);
+    
   }
 
   public hasTowns() {
