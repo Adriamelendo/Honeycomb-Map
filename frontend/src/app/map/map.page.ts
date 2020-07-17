@@ -94,6 +94,9 @@ export class MapPage {
         this.hexContents = undefined;
         this.hexLocked = '';
         this.hideSelectHexagon();
+        this.clickedHex.clearLayers();
+        this.hoverHex.clearLayers();
+        this.disableHover=false;
       }
       this.calculateData();
     });
@@ -191,8 +194,7 @@ export class MapPage {
     this.hexContents = this.data.getContentsAtHex(hex);
     this.clickedHex.clearLayers();
     if (this.hexLocked !== hex) {
-      this.hexLocked = hex;
-      this.centerMapOnHex(hex);
+      this.hexLocked = hex;      
       this.showSelectHexagon();
       const geo = geojson2h3.h3ToFeature(hex);
       this.clickedHex = Leaflet.geoJSON(geo, {
@@ -203,6 +205,7 @@ export class MapPage {
           opacity: 1,
         }
       }).addTo(this.map);
+      this.centerMapOnHex(hex);
     }
     else {
       this.hexContents = undefined;
