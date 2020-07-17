@@ -1,7 +1,7 @@
 import { Component, HostBinding, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { DataService } from '../services/data.service';
+import { Platform } from '@ionic/angular';
 import {
   HCMapDataService,
   HCMapRegion,
@@ -38,7 +38,7 @@ export class MapPage implements OnDestroy {
     return this.appMapClass;
   }
 
-  constructor(private data: HCMapDataService) { }
+  constructor(private platform: Platform, private data: HCMapDataService) { }
 
   ngOnDestroy() {
     this.unsubscribe$.next();
@@ -251,7 +251,9 @@ export class MapPage implements OnDestroy {
   private centerMapOnHex(hex: string) {
     // current center if we want to save
     //this.bigLatLng = this.map.getCenter();
-    this.map.flyTo(h3.h3ToGeo(hex) as Leaflet.LatLngExpression, this.map.getZoom(), { animate: true, duration: 0.8 });
+    if (this.platform.width() < 680) {
+      this.map.flyTo(h3.h3ToGeo(hex) as Leaflet.LatLngExpression, this.map.getZoom(), { animate: true, duration: 0.8 });
+    }
   }
 
   private showSelectHexagon() {
