@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject, combineLatest } from 'rxjs';
+import { Observable, Subject, combineLatest, concat, of } from 'rxjs';
 import { share, map } from 'rxjs/operators';
 import * as L from 'leaflet';
 import * as geojson2h3 from 'geojson2h3';
@@ -40,7 +40,8 @@ export interface HexContents {
 })
 export class HCMapDataService {
 
-  public mapData$: Subject<MapData> = new Subject<MapData>();
+  public mapData$: Observable<MapData> = new Subject<MapData>();
+  public loading$: Observable<boolean>;
 
   private rawRegions$: Observable<any>;
   private rawResources$: Observable<any>;
@@ -50,8 +51,15 @@ export class HCMapDataService {
   private contentsByHex: Map<string, HexContents>;
 
   constructor(private http: HttpClient) {
-    this.rawRegions$ = this.http.get('/assets/data/regions.json');
-    this.rawResources$ = this.http.get('/assets/data/resources.json');
+    this.rawRegions$ = this.http.get('/assets/data/regions.json').pipe(share());
+    this.rawResources$ = this.http.get('/assets/data/resources.json').pipe(share());
+
+    this.loading$ = concat(
+      of(true),
+      combineLatest(this.rawRegions$, this.rawResources$).pipe(
+        map((_) => false)
+      )
+    );
 
     combineLatest(this.rawRegions$, this.rawResources$, this.viewportAndFilter$)
       .subscribe(([rawRegions, rawResources, [bounds, zoom, category, searchText]]) => {
@@ -69,7 +77,7 @@ export class HCMapDataService {
         const regions = this.getRegions(rawRegions, extBounds, hexLevel);
         const resources = this.getResources(rawResources, extBounds, hexLevel, category, searchText);
 
-        this.mapData$.next([regions, resources]);
+        (this.mapData$ as Subject<MapData>).next([regions, resources]);
       });
   }
 

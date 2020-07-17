@@ -1,7 +1,7 @@
-import { Component, HostBinding, OnDestroy } from '@angular/core';
+import { Component, HostBinding, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Platform } from '@ionic/angular';
+import { Platform, LoadingController } from '@ionic/angular';
 import {
   HCMapDataService,
   HCMapRegion,
@@ -19,7 +19,7 @@ import * as geojson2h3 from 'geojson2h3';
   templateUrl: './map.page.html',
   styleUrls: ['./map.page.scss'],
 })
-export class MapPage implements OnDestroy {
+export class MapPage implements OnInit, OnDestroy {
   private map: Leaflet.Map;
   private unsubscribe$ = new Subject<void>();
 
@@ -38,7 +38,28 @@ export class MapPage implements OnDestroy {
     return this.appMapClass;
   }
 
-  constructor(private platform: Platform, private data: HCMapDataService) { }
+  constructor(
+    private platform: Platform,
+    private data: HCMapDataService,
+    private loadingController: LoadingController,
+  ) { }
+
+  ngOnInit() {
+    this.loadingController.create({
+      message: 'La primera carga es bastante lenta, tiene que descargar 30Mb. Luego ya va todo rápido. Estamos en ello. Un poco de paciencia...',
+      spinner: 'crescent'
+    }).then((loading) => {
+      this.data.loading$.subscribe(
+        (isLoading) => {
+          if (isLoading){
+            loading.present();
+          } else {
+            loading.dismiss();
+          }
+        }
+      );
+    });
+  }
 
   ngOnDestroy() {
     this.unsubscribe$.next();
