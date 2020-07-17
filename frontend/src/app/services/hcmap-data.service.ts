@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, Subject, combineLatest } from 'rxjs';
+import { share, map } from 'rxjs/operators';
 import * as L from 'leaflet';
 import * as geojson2h3 from 'geojson2h3';
 import * as h3 from 'h3-js';
 import * as latinize from 'latinize';
-
-import rawResources from '../../assets/data/resources.json';
-import rawRegions from '../../assets/data/regions.json';
 
 export interface HCMapRegion {
   id: string;
@@ -43,45 +42,63 @@ export class HCMapDataService {
 
   public mapData$: Subject<MapData> = new Subject<MapData>();
 
+  private rawRegions$: Observable<any>;
+  private rawResources$: Observable<any>;
+  private viewportAndFilter$ = new Subject<[L.LatLngBounds, number, string, string]>();
+
   private regionsById: Map<string, HCMapRegion>;
   private contentsByHex: Map<string, HexContents>;
 
+  constructor(private http: HttpClient) {
+    this.rawRegions$ = this.http.get('/assets/data/regions.json');
+    this.rawResources$ = this.http.get('/assets/data/resources.json');
+
+    combineLatest(this.rawRegions$, this.rawResources$, this.viewportAndFilter$)
+      .subscribe(([rawRegions, rawResources, [bounds, zoom, category, searchText]]) => {
+        const hexLevel = this.getHexLevel(zoom);
+        const extBounds = this.extendBounds(hexLevel, bounds);
+
+        console.log('Map zoom:', zoom);
+        console.log('Hex level:', hexLevel);
+        console.log('Category:', category);
+        console.log('Search text:', searchText);
+
+        this.regionsById = new Map<string, HCMapRegion>();
+        this.contentsByHex = new Map<string, HexContents>();
+
+        const regions = this.getRegions(rawRegions, extBounds, hexLevel);
+        const resources = this.getResources(rawResources, extBounds, hexLevel, category, searchText);
+
+        this.mapData$.next([regions, resources]);
+      });
+  }
+
   /* Recalculate all map data in the new viewport */
-  public setViewport(
+  public setViewportAndFilter(
     bounds: L.LatLngBounds,
     zoom: number,
     category: string,
     searchText: string,
   ) {
-    const hexLevel = this.getHexLevel(zoom);
-    const extBounds = this.extendBounds(hexLevel, bounds);
-
-    console.log('Map zoom:', zoom);
-    console.log('Hex level:', hexLevel);
-    console.log('Category:', category);
-    console.log('Search text:', searchText);
-
-    this.regionsById = new Map<string, HCMapRegion>();
-    this.contentsByHex = new Map<string, HexContents>();
-
-    const regions = this.getRegions(extBounds, hexLevel);
-    const resources = this.getResources(extBounds, hexLevel, category, searchText);
-
-    this.mapData$.next([regions, resources]);
+    this.viewportAndFilter$.next([bounds, zoom, category, searchText]);
   }
 
   /* Search one particular resource */
-  public getResourceById(id: number): HCMapResource | undefined {
-    const hexLevels = Object.keys(rawRegions);
-    const levelRawResources = (hexLevels.length > 0) ? 
-      rawResources[hexLevels[0]] :
-      [];
-    const rawResource = levelRawResources.find(r => r.id === id);
-    if (!rawResource) {
-      return undefined;
-    } else {
-      return this.makeResource(rawResource);
-    }
+  public getResourceById(id: number): Observable<HCMapResource | undefined> {
+    return this.rawResources$.pipe(
+      map((rawResources) => {
+        const hexLevels = Object.keys(rawResources);
+        const levelRawResources = (hexLevels.length > 0) ? 
+          rawResources[hexLevels[0]] :
+          [];
+        const rawResource = levelRawResources.find(r => r.id === id);
+        if (!rawResource) {
+          return undefined;
+        } else {
+          return this.makeResource(rawResource);
+        }
+      })
+    );
   }
 
   /* Get all contents at a given hex */
@@ -114,7 +131,7 @@ export class HCMapDataService {
    * Extract the regions that intersect with the given bounds, and generate
    * their GeoJSON shape at the given hexLevel.
    */
-  private getRegions(bounds: L.LatLngBounds, hexLevel: number): HCMapRegion[] {
+  private getRegions(rawRegions: any, bounds: L.LatLngBounds, hexLevel: number): HCMapRegion[] {
     const levelRawRegions = rawRegions[hexLevel] || [];
     return levelRawRegions.filter(
       (rawRegion) => this.intersectsWithBounds(rawRegion.container, bounds)
@@ -162,6 +179,7 @@ export class HCMapDataService {
    * at the given hexLevel.
    */
   private getResources(
+    rawResources: any,
     bounds: L.LatLngBounds,
     hexLevel: number,
     category: string,

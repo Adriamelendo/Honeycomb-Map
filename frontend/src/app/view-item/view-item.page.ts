@@ -18,7 +18,10 @@ export class ViewItemPage implements OnInit {
 
   async ngOnInit() {
     const id = this.activatedRoute.snapshot.paramMap.get('id');
-    this.resource = this.data.getResourceById(parseInt(id));
+    this.data.getResourceById(parseInt(id))
+      .subscribe((resource) => {
+        this.resource = resource;
+      });
   }
 
   getBackButtonText() {
